@@ -86,5 +86,45 @@ func (p Postgres) NewCurrentProducts(order entities.Order) error {
 }
 
 func (p Postgres) GetAllCurrentOrders() []entities.Order {
-	return nil
+	var orders []entities.Order
+
+	rows, err := p.DB.Query("SELECT products.id, name, size, color, text, img, amount, current_orders.id, user_id, start FROM products JOIN current_orders ON products.current_order_id = current_orders.id;")
+	if err != nil {
+		p.logger.Error("GetAllCurrentOrders: select join error", log.Fields{
+			"error": err,
+		})
+
+		return nil
+	}
+
+	for rows.Next() {
+		var order entities.Order
+		var product entities.Product
+
+		err = rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.Size,
+			&product.Color,
+			&product.Text,
+			&product.Img,
+			&product.Amount,
+			&order.ID,
+			&order.UserID,
+			&order.Date,
+		)
+		if err != nil {
+			p.logger.Error("GetAllCurrentOrders: scan error", log.Fields{
+				"error": err,
+			})
+
+			return nil
+		}
+
+		order.Composition = append(order.Composition, product)
+
+		orders = append(orders, order)
+	}
+
+	return orders
 }

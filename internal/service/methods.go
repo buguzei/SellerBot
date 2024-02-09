@@ -80,3 +80,9 @@ func (s Svc) NewOrder(order entities.Order) error {
 
 	return nil
 }
+
+func (s Svc) GetAllCurrentOrders() []entities.Order {
+	orders := s.db.GetAllCurrentOrders()
+
+	return orders
+}

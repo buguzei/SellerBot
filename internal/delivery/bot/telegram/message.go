@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func (tg TGBot) HandleMessage(update tgbotapi.Update) {
@@ -138,8 +139,11 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 		}
 
 		delete(tg.cache[userID], "newProd")
+		delete(tg.cache[userID], "lvl")
 	default:
-		switch update.Message.Command() {
+		split := strings.Split(update.Message.Command(), "_")
+
+		switch split[0] {
 		case "start":
 			tg.svc.NewUser(entities.User{
 				ID:      update.Message.From.ID,
@@ -154,14 +158,49 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 				})
 				return
 			}
-		case "curr_orders":
+		case "current":
+			var access bool
+
 			for _, admin := range tg.conf.Admins {
 				if userID == admin {
-
+					access = true
 				}
 			}
 
-			return
+			if access {
+				orders := tg.svc.GetAllCurrentOrders()
+				for _, order := range orders {
+					user := tg.svc.GetUser(order.UserID)
+
+					var productText string
+
+					for _, product := range order.Composition {
+						productText += fmt.Sprintf("\n\nТип: %s\nРазмер: %s\nЦвет %s\nТекст: %s\nФото: %s\nКол-во: %d",
+							product.Name,
+							product.Size,
+							product.Color,
+							product.Text,
+							product.Img,
+							product.Amount,
+						)
+					}
+
+					sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата заказа: %v%s", user.Name, user.Address, order.Date, productText)
+
+					err := tg.newMsg(userID, sendText, nil)
+					if err != nil {
+						tg.logger.Error("error sending message", log2.Fields{
+							"error": err,
+						})
+						return
+					}
+				}
+
+			}
+		case "done":
+			if len(split) == 2 {
+
+			}
 		}
 	}
 }

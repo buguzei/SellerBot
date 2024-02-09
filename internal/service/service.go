@@ -31,7 +31,7 @@ type UserSvc interface {
 
 type OrderSvc interface {
 	NewOrder(entities.Order) error
-	//GetAllCurrentOrders() []entities.Order
+	GetAllCurrentOrders() []entities.Order
 }
 
 type CartSvc interface {
