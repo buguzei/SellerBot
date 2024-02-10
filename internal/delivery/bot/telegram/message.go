@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -185,7 +186,7 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 						)
 					}
 
-					sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата заказа: %v%s", user.Name, user.Address, order.Date, productText)
+					sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата заказа: %v%s\n\n/done_%d", user.Name, user.Address, order.Start, productText, order.ID)
 
 					err := tg.newMsg(userID, sendText, nil)
 					if err != nil {
@@ -195,11 +196,47 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 						return
 					}
 				}
-
 			}
 		case "done":
-			if len(split) == 2 {
+			if len(split) == 1 {
+				orders := tg.svc.GetAllDoneOrders()
+				for _, order := range orders {
+					user := tg.svc.GetUser(order.UserID)
 
+					var productText string
+
+					for _, product := range order.Composition {
+						productText += fmt.Sprintf("\n\nТип: %s\nРазмер: %s\nЦвет %s\nТекст: %s\nФото: %s\nКол-во: %d",
+							product.Name,
+							product.Size,
+							product.Color,
+							product.Text,
+							product.Img,
+							product.Amount,
+						)
+					}
+
+					sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата создания заказа: %v\nДата выполнения заказа: %v%s", user.Name, user.Address, order.Start, order.Done, productText)
+
+					err := tg.newMsg(userID, sendText, nil)
+					if err != nil {
+						tg.logger.Error("error sending message", log2.Fields{
+							"error": err,
+						})
+						return
+					}
+				}
+			}
+
+			if len(split) == 2 {
+				orderID, err := strconv.Atoi(split[1])
+				if err != nil {
+					tg.logger.Error("error converting string to int", log2.Fields{
+						"error": err,
+					})
+				}
+
+				tg.svc.FromCurrentToDone(int64(orderID))
 			}
 		}
 	}

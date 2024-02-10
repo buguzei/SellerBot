@@ -17,9 +17,11 @@ type UserRepo interface {
 }
 
 type OrderRepo interface {
-	InsertOrder(entities.Order) (*int64, error)
-	NewCurrentProducts(order entities.Order) error
-	GetAllCurrentOrders() []entities.Order
+	InsertOrder(entities.CurrentOrder) (*int64, error)
+	NewCurrentProducts(order entities.CurrentOrder) error
+	GetAllCurrentOrders() []entities.CurrentOrder
+	GetAllDoneOrders() []entities.DoneOrder
+	FromCurrentToDone(int64)
 }
 
 type CartRepo interface {

@@ -67,6 +67,7 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 
 				tg.svc.NewCartProduct(userID, tg.cache[userID]["currentIdx"].(int), currentProd)
 			case "decrease":
+
 				currentProd = tg.svc.GetCartProduct(userID, tg.cache[userID]["currentIdx"].(int))
 				currentProd.Amount--
 
@@ -138,10 +139,10 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 	case "design":
 		cart := tg.svc.GetCart(userID)
 
-		order := entities.Order{
+		order := entities.CurrentOrder{
 			UserID:      userID,
 			Composition: cart,
-			Date:        time.Now(),
+			Start:       time.Now(),
 		}
 
 		tg.cache[userID]["currentIdx"] = 0

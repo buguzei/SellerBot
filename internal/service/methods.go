@@ -55,7 +55,7 @@ func (s Svc) GetCart(userID int64) []entities.Product {
 
 // order methods
 
-func (s Svc) NewOrder(order entities.Order) error {
+func (s Svc) NewOrder(order entities.CurrentOrder) error {
 	orderID, err := s.db.InsertOrder(order)
 	if err != nil {
 		s.logger.Error("NewOrder: creating order failed", log.Fields{
@@ -81,8 +81,18 @@ func (s Svc) NewOrder(order entities.Order) error {
 	return nil
 }
 
-func (s Svc) GetAllCurrentOrders() []entities.Order {
+func (s Svc) GetAllCurrentOrders() []entities.CurrentOrder {
 	orders := s.db.GetAllCurrentOrders()
+
+	return orders
+}
+
+func (s Svc) FromCurrentToDone(orderID int64) {
+	s.db.FromCurrentToDone(orderID)
+}
+
+func (s Svc) GetAllDoneOrders() []entities.DoneOrder {
+	orders := s.db.GetAllDoneOrders()
 
 	return orders
 }
