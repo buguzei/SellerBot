@@ -3,7 +3,6 @@ package postgres
 import (
 	"bot/internal/entities"
 	"bot/internal/log"
-	"fmt"
 	"time"
 )
 
@@ -30,7 +29,9 @@ func (p Postgres) GetUser(userID int64) *entities.User {
 
 	err := row.Scan(&user.ID, &user.Name, &user.Address)
 	if err != nil {
-		fmt.Println(err)
+		p.logger.Error("GetUser: scan error", log.Fields{
+			"error": err,
+		})
 	}
 
 	return &user
@@ -160,8 +161,6 @@ func (p Postgres) FromCurrentToDone(orderID int64) {
 			"error": err,
 		})
 	}
-
-	fmt.Println(doneID)
 
 	_, err = p.DB.Exec("UPDATE products SET current_order_id=null, done_order_id=($1) WHERE current_order_id=($2);", doneID, order.ID)
 	if err != nil {

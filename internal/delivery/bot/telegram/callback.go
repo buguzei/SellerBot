@@ -11,7 +11,6 @@ import (
 )
 
 func (tg TGBot) HandleCallback(update tgbotapi.Update) {
-	fmt.Println(tg.conf.Admins)
 	userID := update.CallbackQuery.From.ID
 
 	data := update.CallbackData()
@@ -21,6 +20,9 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 	var kb *tgbotapi.InlineKeyboardMarkup
 
 	switch split[0] {
+	case "info":
+		sendText = infoText
+		kb = backToStartKB()
 	case "profile":
 		if len(split) == 1 {
 			user := tg.svc.GetUser(userID)
@@ -34,76 +36,133 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 			case "name":
 				tg.cache[userID]["lvl"] = "name"
 
-				sendText = "Введите ваше новое имя"
+				sendText = newNameText
 			case "address":
 				tg.cache[userID]["lvl"] = "address"
 
-				sendText = "Введите ваш новый адрес"
+				sendText = newAddressText
 			}
 		}
 	case "cart":
-		var prodAmount int64
-		var currentProd entities.Product
-
 		if len(split) == 1 {
 			if tg.svc.CartLen(userID) == 0 {
-				tg.NewAlert(update.CallbackQuery.ID, "Ваша корзина пуста =)")
+				tg.NewAlert(update.CallbackQuery.ID, emptyCartText)
 				return
 			}
 
-			tg.cache[userID]["currentIdx"] = 1
+			cart := tg.svc.GetCart(userID)
 
-			prodAmount = tg.svc.CartLen(userID)
-			currentProd = tg.svc.GetCartProduct(userID, tg.cache[userID]["currentIdx"].(int))
+			tg.cache[userID]["keys"] = make([]int, 0, len(cart))
+
+			for key := range cart {
+				tg.cache[userID]["keys"] = append(tg.cache[userID]["keys"].([]int), key)
+			}
+
+			tg.cache[userID]["idx"] = 0
 		}
 
 		if len(split) == 2 {
-			prodAmount = tg.svc.CartLen(userID)
-
 			switch split[1] {
+			case "delete_prod":
+				keys := tg.cache[userID]["keys"].([]int)
+				idx := tg.cache[userID]["idx"].(int)
+
+				tg.svc.DeleteProductFromCart(userID, keys[idx])
+
+				if tg.svc.CartLen(userID) == 0 {
+					sendText = startText
+					kb = newStartKB()
+
+					err := tg.newEditMsg(userID, tg.cache[userID]["msgID"].(int), sendText, kb)
+					if err != nil {
+						tg.logger.Error("edit msg procedure failed", log2.Fields{
+							"error": err,
+						})
+					}
+
+					return
+				}
+
+				cart := tg.svc.GetCart(userID)
+
+				tg.cache[userID]["keys"] = make([]int, 0, len(cart))
+
+				for key := range cart {
+					tg.cache[userID]["keys"] = append(tg.cache[userID]["keys"].([]int), key)
+				}
+
+				tg.cache[userID]["idx"] = 0
 			case "increase":
-				currentProd = tg.svc.GetCartProduct(userID, tg.cache[userID]["currentIdx"].(int))
+				keys := tg.cache[userID]["keys"].([]int)
+				idx := tg.cache[userID]["idx"].(int)
+
+				currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+
 				currentProd.Amount++
 
-				tg.svc.NewCartProduct(userID, tg.cache[userID]["currentIdx"].(int), currentProd)
+				tg.svc.NewCartProduct(userID, keys[idx], currentProd)
 			case "decrease":
+				keys := tg.cache[userID]["keys"].([]int)
+				idx := tg.cache[userID]["idx"].(int)
 
-				currentProd = tg.svc.GetCartProduct(userID, tg.cache[userID]["currentIdx"].(int))
+				currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+
+				if currentProd.Amount == 1 {
+					return
+				}
+
 				currentProd.Amount--
 
-				tg.svc.NewCartProduct(userID, tg.cache[userID]["currentIdx"].(int), currentProd)
+				tg.svc.NewCartProduct(userID, keys[idx], currentProd)
 			case "right":
-				if tg.cache[userID]["currentIdx"] == int(prodAmount) {
-					tg.cache[userID]["currentIdx"] = 1
+				if tg.cache[userID]["idx"] == int(tg.svc.CartLen(userID))-1 {
+					tg.cache[userID]["idx"] = 0
 				} else {
-					tg.cache[userID]["currentIdx"] = tg.cache[userID]["currentIdx"].(int) + 1
+					tg.cache[userID]["idx"] = tg.cache[userID]["idx"].(int) + 1
 				}
 			case "left":
-				if tg.cache[userID]["currentIdx"] == 1 {
-					tg.cache[userID]["currentIdx"] = int(prodAmount)
+				if tg.cache[userID]["idx"] == 0 {
+					tg.cache[userID]["idx"] = int(tg.svc.CartLen(userID)) - 1
 				} else {
-					tg.cache[userID]["currentIdx"] = tg.cache[userID]["currentIdx"].(int) - 1
+					tg.cache[userID]["idx"] = tg.cache[userID]["idx"].(int) - 1
 				}
 			}
-			currentProd = tg.svc.GetCartProduct(userID, tg.cache[userID]["currentIdx"].(int))
 		}
 
-		sendText = fmt.Sprintf("Ваша корзина.\n\n%d из %d\n\nКатегория: %s\nЦвет: %s\nРазмер: %s\n",
-			tg.cache[userID]["currentIdx"],
-			prodAmount,
-			currentProd.Name,
-			currentProd.Color,
-			currentProd.Size,
-		)
+		keys := tg.cache[userID]["keys"].([]int)
+		idx := tg.cache[userID]["idx"].(int)
+
+		currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+
+		if currentProd.Text != "" {
+			sendText = fmt.Sprintf("Ваша корзина.\n\n%d из %d\n\nКатегория: %s\nЦвет: %s\nРазмер: %s\nТекст: %s",
+				tg.cache[userID]["idx"].(int)+1,
+				len(keys),
+				currentProd.Name,
+				currentProd.Color,
+				currentProd.Size,
+				currentProd.Text,
+			)
+		}
+
+		if currentProd.Img != "" {
+			sendText = fmt.Sprintf("Ваша корзина.\n\n%d из %d\n\nКатегория: %s\nЦвет: %s\nРазмер: %s\nФото: %s",
+				tg.cache[userID]["idx"].(int)+1,
+				len(keys),
+				currentProd.Name,
+				currentProd.Color,
+				currentProd.Size,
+				currentProd.Img,
+			)
+		}
 
 		kb = newCartKB(currentProd.Amount)
-
 	case "home":
-		sendText = "Дарова, бро!"
+		sendText = startText
 		kb = newStartKB()
 	case "start_shopping":
 		if len(split) == 1 {
-			sendText = "Выберите, что вы хотите заказать"
+			sendText = selectTypeText
 
 			kb = newProdNameKB(data)
 		}
@@ -112,21 +171,18 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 			switch split[1] {
 			case "hoodie":
 				tg.cache[userID]["newProd"] = &entities.Product{Name: "hoodie"}
-
-				sendText = "Выберите цвет вашей толстовки"
-				kb = newProdColorKB(data)
 			case "trousers":
 				tg.cache[userID]["newProd"] = &entities.Product{Name: "trousers"}
-
-				sendText = "Выберите цвет ваших штанов"
-				kb = newProdColorKB(data)
 			}
+
+			sendText = selectColorText
+			kb = newProdColorKB(data)
 		}
 
 		if len(split) == 3 {
 			tg.cache[userID]["newProd"].(*entities.Product).Color = split[2]
 
-			sendText = "Выберите размер"
+			sendText = selectSizeText
 			kb = newProdSizeKB(data)
 		}
 
@@ -134,14 +190,20 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 			tg.cache[userID]["newProd"].(*entities.Product).Size = split[3]
 
 			tg.cache[userID]["lvl"] = "print"
-			sendText = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
+			sendText = customPrintText
 		}
 	case "design":
 		cart := tg.svc.GetCart(userID)
 
+		cartProducts := make([]entities.Product, len(cart))
+
+		for _, val := range cart {
+			cartProducts = append(cartProducts, val)
+		}
+
 		order := entities.CurrentOrder{
 			UserID:      userID,
-			Composition: cart,
+			Composition: cartProducts,
 			Start:       time.Now(),
 		}
 
@@ -152,7 +214,7 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 			log.Println(err)
 		}
 
-		sendText = "Ваш заказ был успешно создан! Мы начнем делать ваш заказ сразу после того, как вы оплатите заказ на этот номер телефона:"
+		sendText = createOrderText
 		kb = backToStartKB()
 	default:
 		return

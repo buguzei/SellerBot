@@ -40,5 +40,6 @@ type CartSvc interface {
 	NewCartProduct(int64, int, entities.Product)
 	CartLen(int64) int64
 	GetCartProduct(int64, int) entities.Product
-	GetCart(int64) []entities.Product
+	GetCart(int64) map[int]entities.Product
+	DeleteProductFromCart(int64, int)
 }

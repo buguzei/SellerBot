@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -29,7 +28,6 @@ func (z Zap) Named(name string) Logger {
 func (z Zap) Debug(message string, args Fields) {
 	for key, value := range args {
 		t := checkZapType(value)
-		fmt.Println(t, 9990000999)
 
 		f := zap.Field{
 			Key:       key,
@@ -57,7 +55,6 @@ func (z Zap) Error(message string, args Fields) {
 
 	for key, value := range args {
 		t := checkZapType(value)
-		fmt.Println(t, 9990000999)
 
 		f = append(f, zap.Field{
 			Key:       key,

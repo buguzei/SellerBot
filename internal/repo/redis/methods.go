@@ -4,7 +4,6 @@ import (
 	"bot/internal/entities"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 )
@@ -40,8 +39,6 @@ func (r Redis) GetCartProduct(userID int64, idx int) entities.Product {
 		log.Println(err)
 	}
 
-	fmt.Println(res)
-
 	var prod entities.Product
 
 	err = json.Unmarshal([]byte(res), &prod)
@@ -52,16 +49,16 @@ func (r Redis) GetCartProduct(userID int64, idx int) entities.Product {
 	return prod
 }
 
-func (r Redis) GetCart(userID int64) []entities.Product {
+func (r Redis) GetCart(userID int64) map[int]entities.Product {
 	strID := strconv.Itoa(int(userID))
 	res, err := r.Client.HGetAll(context.Background(), strID).Result()
 	if err != nil {
 		log.Println(err)
 	}
 
-	var cart []entities.Product
+	cart := make(map[int]entities.Product)
 
-	for _, strValue := range res {
+	for strKey, strValue := range res {
 		var value entities.Product
 
 		err = json.Unmarshal([]byte(strValue), &value)
@@ -69,7 +66,12 @@ func (r Redis) GetCart(userID int64) []entities.Product {
 			log.Println(err)
 		}
 
-		cart = append(cart, value)
+		key, err := strconv.Atoi(strKey)
+		if err != nil {
+			log.Println(err)
+		}
+
+		cart[key] = value
 	}
 
 	return cart
@@ -79,4 +81,11 @@ func (r Redis) ClearCart(userID int64) {
 	strID := strconv.Itoa(int(userID))
 
 	r.Client.Del(context.Background(), strID)
+}
+
+func (r Redis) DeleteProductFromCart(userID int64, idx int) {
+	strID := strconv.Itoa(int(userID))
+	strIdx := strconv.Itoa(idx)
+
+	r.Client.HDel(context.Background(), strID, strIdx)
 }

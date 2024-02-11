@@ -48,9 +48,13 @@ func (s Svc) GetCartProduct(userID int64, idx int) entities.Product {
 	return prod
 }
 
-func (s Svc) GetCart(userID int64) []entities.Product {
+func (s Svc) GetCart(userID int64) map[int]entities.Product {
 	cart := s.db.GetCart(userID)
 	return cart
+}
+
+func (s Svc) DeleteProductFromCart(userID int64, idx int) {
+	s.db.DeleteProductFromCart(userID, idx)
 }
 
 // order methods

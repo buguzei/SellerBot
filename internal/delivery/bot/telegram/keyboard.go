@@ -6,6 +6,20 @@ import (
 	"strconv"
 )
 
+const (
+	startText        = "Дарова, бро"
+	addingToCartText = "Отлично! Вы успешно добавили ваш товар в корзину!"
+	customPrintText  = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
+	emptyCartText    = "Ваша корзина пуста =)"
+	newNameText      = "Введите ваше новое имя"
+	newAddressText   = "Введите ваш новый адрес"
+	createOrderText  = "Ваш заказ был успешно создан! Мы начнем делать ваш заказ сразу после того, как вы оплатите заказ на этот номер телефона:"
+	selectTypeText   = "Выберите, что вы хотите заказать"
+	selectSizeText   = "Выберите размер"
+	selectColorText  = "Выберите цвет"
+	infoText         = "Супермегаважная инфа про нас"
+)
+
 func newStartKB() *tgbotapi.InlineKeyboardMarkup {
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -87,6 +101,9 @@ func newCartKB(amount int) *tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonData(strAmount, " "),
 			tgbotapi.NewInlineKeyboardButtonData("+", "cart/increase"),
 			tgbotapi.NewInlineKeyboardButtonData("-->", "cart/right"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Удалить товар", "cart/delete_prod"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "home"),

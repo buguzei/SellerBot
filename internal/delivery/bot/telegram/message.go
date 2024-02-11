@@ -5,11 +5,6 @@ import (
 	log2 "bot/internal/log"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -46,74 +41,8 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 				})
 			}
 
-			response, err := http.Get(fileURL)
-			if err != nil {
-				tg.logger.Error("get http failed", log2.Fields{
-					"error": err,
-				})
-				return
-			}
-
-			defer func() {
-				err = response.Body.Close()
-				if err != nil {
-					tg.logger.Error("closing response body failed", log2.Fields{
-						"error": err,
-					})
-				}
-				return
-			}()
-
-			output, err := os.Create(filepath.Join("./././filesStorage/", filepath.Base(update.Message.Document.FileName)))
-			if err != nil {
-				tg.logger.Error("creating file failed", log2.Fields{
-					"error": err,
-				})
-				return
-			}
-
-			defer func() {
-				err = output.Close()
-				if err != nil {
-					tg.logger.Error("closing output body failed", log2.Fields{
-						"error": err,
-					})
-					return
-				}
-			}()
-
-			extension := filepath.Ext(update.Message.Document.FileName)
-			fileName := fileID + extension
-
-			err = os.Rename(fmt.Sprintf("./././filesStorage/%s", update.Message.Document.FileName), fileName)
-			if err != nil {
-				log.Println(err)
-			}
-
-			data, err := io.ReadAll(response.Body)
-			if err != nil {
-				tg.logger.Error("reading response body failed", log2.Fields{
-					"error": err,
-				})
-				return
-			}
-
-			_, err = output.Write(data)
-			if err != nil {
-				tg.logger.Error("writing file failed", log2.Fields{
-					"error": err,
-				})
-				return
-			}
-
-			tg.logger.Info("file installed successfully", log2.Fields{
-				"file": fileName,
-			})
-
 			// adding product to cart
-			tg.cache[userID]["newProd"].(*entities.Product).Img = fileName
-
-			fmt.Println(tg.cache[userID]["newProd"].(*entities.Product))
+			tg.cache[userID]["newProd"].(*entities.Product).Img = fileURL
 		}
 
 		if update.Message.Text != "" {
@@ -132,7 +61,7 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 		// adding product to cart
 		tg.svc.NewCartProduct(userID, tg.cache[userID]["prodIdx"].(int), *tg.cache[userID]["newProd"].(*entities.Product))
 
-		err := tg.newMsg(userID, "Отлично! Вы успешно добавили ваш товар в корзину!", backToStartKB())
+		err := tg.newMsg(userID, addingToCartText, backToStartKB())
 		if err != nil {
 			tg.logger.Error("new msg procedure failed", log2.Fields{
 				"error": err,
@@ -152,7 +81,7 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 				Address: "",
 			})
 
-			err := tg.newMsg(userID, "Дарова, бро", newStartKB())
+			err := tg.newMsg(userID, startText, newStartKB())
 			if err != nil {
 				tg.logger.Error("error sending message", log2.Fields{
 					"error": err,

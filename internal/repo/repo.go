@@ -18,7 +18,7 @@ type UserRepo interface {
 
 type OrderRepo interface {
 	InsertOrder(entities.CurrentOrder) (*int64, error)
-	NewCurrentProducts(order entities.CurrentOrder) error
+	NewCurrentProducts(entities.CurrentOrder) error
 	GetAllCurrentOrders() []entities.CurrentOrder
 	GetAllDoneOrders() []entities.DoneOrder
 	FromCurrentToDone(int64)
@@ -28,8 +28,9 @@ type CartRepo interface {
 	NewCartProduct(int64, int, entities.Product)
 	GetCartProduct(int64, int) entities.Product
 	CartLen(int64) int64
-	GetCart(int64) []entities.Product
+	GetCart(int64) map[int]entities.Product
 	ClearCart(int64)
+	DeleteProductFromCart(int64, int)
 }
 
 type CombineRepos struct {
