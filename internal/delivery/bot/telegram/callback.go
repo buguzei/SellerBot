@@ -16,8 +16,10 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 	data := update.CallbackData()
 	split := strings.Split(data, "/")
 
-	var sendText string
+	var sendText, photoFile string
 	var kb *tgbotapi.InlineKeyboardMarkup
+
+	var isPhoto bool
 
 	switch split[0] {
 	case "info":
@@ -46,7 +48,7 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 	case "cart":
 		if len(split) == 1 {
 			if tg.svc.CartLen(userID) == 0 {
-				tg.NewAlert(update.CallbackQuery.ID, emptyCartText)
+				tg.newAlert(update.CallbackQuery.ID, emptyCartText)
 				return
 			}
 
@@ -59,6 +61,8 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 			}
 
 			tg.cache[userID]["idx"] = 0
+
+			isPhoto = true
 		}
 
 		if len(split) == 2 {
@@ -73,7 +77,7 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 					sendText = startText
 					kb = newStartKB()
 
-					err := tg.newEditMsg(userID, tg.cache[userID]["msgID"].(int), sendText, kb)
+					err := tg.newEditMsgByDelete(userID, sendText, kb)
 					if err != nil {
 						tg.logger.Error("edit msg procedure failed", log2.Fields{
 							"error": err,
@@ -92,6 +96,8 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 				}
 
 				tg.cache[userID]["idx"] = 0
+
+				isPhoto = true
 			case "increase":
 				keys := tg.cache[userID]["keys"].([]int)
 				idx := tg.cache[userID]["idx"].(int)
@@ -101,6 +107,16 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 				currentProd.Amount++
 
 				tg.svc.NewCartProduct(userID, keys[idx], currentProd)
+
+				kb = newCartKB(currentProd.Amount)
+
+				if err := tg.newEditMsgKeyboard(userID, kb); err != nil {
+					tg.logger.Error("new edit msg keyboard procedure failed", log2.Fields{
+						"error": err,
+					})
+				}
+
+				return
 			case "decrease":
 				keys := tg.cache[userID]["keys"].([]int)
 				idx := tg.cache[userID]["idx"].(int)
@@ -114,18 +130,40 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 				currentProd.Amount--
 
 				tg.svc.NewCartProduct(userID, keys[idx], currentProd)
+
+				kb = newCartKB(currentProd.Amount)
+
+				if err := tg.newEditMsgKeyboard(userID, kb); err != nil {
+					tg.logger.Error("new edit msg keyboard procedure failed", log2.Fields{
+						"error": err,
+					})
+				}
+
+				return
 			case "right":
+				if tg.svc.CartLen(userID) == 1 {
+					return
+				}
+
 				if tg.cache[userID]["idx"] == int(tg.svc.CartLen(userID))-1 {
 					tg.cache[userID]["idx"] = 0
 				} else {
 					tg.cache[userID]["idx"] = tg.cache[userID]["idx"].(int) + 1
 				}
+
+				isPhoto = true
 			case "left":
+				if tg.svc.CartLen(userID) == 1 {
+					return
+				}
+
 				if tg.cache[userID]["idx"] == 0 {
 					tg.cache[userID]["idx"] = int(tg.svc.CartLen(userID)) - 1
 				} else {
 					tg.cache[userID]["idx"] = tg.cache[userID]["idx"].(int) - 1
 				}
+
+				isPhoto = true
 			}
 		}
 
@@ -157,39 +195,48 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 		}
 
 		kb = newCartKB(currentProd.Amount)
+
+		if isPhoto {
+			photoFile = fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
+		}
 	case "home":
 		sendText = startText
 		kb = newStartKB()
 	case "start_shopping":
-		if len(split) == 1 {
+		switch len(split) {
+		case 1:
 			sendText = selectTypeText
 
 			kb = newProdNameKB(data)
-		}
+		case 2:
+			isPhoto = true
 
-		if len(split) == 2 {
 			switch split[1] {
 			case "hoodie":
 				tg.cache[userID]["newProd"] = &entities.Product{Name: "hoodie"}
+				photoFile = "white_trousers.jpg"
 			case "trousers":
 				tg.cache[userID]["newProd"] = &entities.Product{Name: "trousers"}
+				photoFile = "white_trousers.jpg"
 			}
 
 			sendText = selectColorText
 			kb = newProdColorKB(data)
-		}
+		case 3:
+			isPhoto = true
 
-		if len(split) == 3 {
 			tg.cache[userID]["newProd"].(*entities.Product).Color = split[2]
 
+			photoFile = fmt.Sprintf("%s_%s.jpg", split[2], split[1])
 			sendText = selectSizeText
 			kb = newProdSizeKB(data)
-		}
-
-		if len(split) == 4 {
+		case 4:
+			isPhoto = true
 			tg.cache[userID]["newProd"].(*entities.Product).Size = split[3]
 
 			tg.cache[userID]["lvl"] = "print"
+
+			photoFile = fmt.Sprintf("%s_%s.jpg", split[2], split[1])
 			sendText = customPrintText
 		}
 	case "design":
@@ -220,10 +267,24 @@ func (tg TGBot) HandleCallback(update tgbotapi.Update) {
 		return
 	}
 
-	err := tg.newEditMsg(userID, tg.cache[userID]["msgID"].(int), sendText, kb)
-	if err != nil {
-		tg.logger.Error("edit msg procedure failed", log2.Fields{
-			"error": err,
-		})
+	if isPhoto {
+		fmt.Println("here1")
+		err := tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
+		if err != nil {
+			tg.logger.Error("new edit photo msg procedure failed", log2.Fields{
+				"error": err,
+			})
+		}
+	}
+
+	if !isPhoto {
+		fmt.Println("here2")
+
+		err := tg.newEditMsgByDelete(userID, sendText, kb)
+		if err != nil {
+			tg.logger.Error("new edit msg procedure failed", log2.Fields{
+				"error": err,
+			})
+		}
 	}
 }

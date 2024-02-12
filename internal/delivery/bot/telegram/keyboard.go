@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	// msg texts
 	startText        = "Дарова, бро"
 	addingToCartText = "Отлично! Вы успешно добавили ваш товар в корзину!"
 	customPrintText  = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
@@ -18,6 +19,13 @@ const (
 	selectSizeText   = "Выберите размер"
 	selectColorText  = "Выберите цвет"
 	infoText         = "Супермегаважная инфа про нас"
+
+	// from eng to rus
+	trousers = "штаны"
+	hoodie   = "толстовка"
+
+	black = "Черный"
+	white = "Белый"
 )
 
 func newStartKB() *tgbotapi.InlineKeyboardMarkup {
