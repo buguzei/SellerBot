@@ -30,10 +30,10 @@ type UserSvc interface {
 }
 
 type OrderSvc interface {
-	NewOrder(entities.CurrentOrder) error
+	NewCurrentOrder(entities.CurrentOrder) error
 	GetAllCurrentOrders() []entities.CurrentOrder
 	GetAllDoneOrders() []entities.DoneOrder
-	FromCurrentToDone(int64)
+	NewDoneOrder(int64)
 }
 
 type CartSvc interface {

@@ -59,10 +59,10 @@ func (s Svc) DeleteProductFromCart(userID int64, idx int) {
 
 // order methods
 
-func (s Svc) NewOrder(order entities.CurrentOrder) error {
-	orderID, err := s.db.InsertOrder(order)
+func (s Svc) NewCurrentOrder(order entities.CurrentOrder) error {
+	orderID, err := s.db.NewCurrentOrder(order)
 	if err != nil {
-		s.logger.Error("NewOrder: creating order failed", log.Fields{
+		s.logger.Error("NewCurrentOrder: creating order failed", log.Fields{
 			"error": err,
 		})
 
@@ -73,7 +73,7 @@ func (s Svc) NewOrder(order entities.CurrentOrder) error {
 
 	err = s.db.NewCurrentProducts(order)
 	if err != nil {
-		s.logger.Error("NewOrder: creating product failed", log.Fields{
+		s.logger.Error("NewCurrentOrder: creating product failed", log.Fields{
 			"error": err,
 		})
 
@@ -91,8 +91,8 @@ func (s Svc) GetAllCurrentOrders() []entities.CurrentOrder {
 	return orders
 }
 
-func (s Svc) FromCurrentToDone(orderID int64) {
-	s.db.FromCurrentToDone(orderID)
+func (s Svc) NewDoneOrder(orderID int64) {
+	s.db.NewDoneOrder(orderID)
 }
 
 func (s Svc) GetAllDoneOrders() []entities.DoneOrder {

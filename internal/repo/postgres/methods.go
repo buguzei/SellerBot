@@ -49,12 +49,12 @@ func (p Postgres) UpdateUser(user entities.User) {
 
 // order methods
 
-func (p Postgres) InsertOrder(order entities.CurrentOrder) (*int64, error) {
+func (p Postgres) NewCurrentOrder(order entities.CurrentOrder) (*int64, error) {
 	var orderID int64
 
 	err := p.DB.QueryRow("INSERT INTO current_orders(user_id, start) VALUES (($1), ($2)) RETURNING id;", order.UserID, order.Start).Scan(&orderID)
 	if err != nil {
-		p.logger.Error("InsertOrder: insert error", log.Fields{
+		p.logger.Error("NewCurrentOrder: insert error", log.Fields{
 			"error": err,
 		})
 
@@ -131,10 +131,10 @@ func (p Postgres) GetAllCurrentOrders() []entities.CurrentOrder {
 	return orders
 }
 
-func (p Postgres) FromCurrentToDone(orderID int64) {
+func (p Postgres) NewDoneOrder(orderID int64) {
 	tx, err := p.DB.Begin()
 	if err != nil {
-		p.logger.Error("FromCurrentToDone: begin transaction error", log.Fields{
+		p.logger.Error("NewDoneOrder: begin transaction error", log.Fields{
 			"error": err,
 		})
 	}
@@ -146,7 +146,7 @@ func (p Postgres) FromCurrentToDone(orderID int64) {
 
 	err = row.Scan(&order.ID, &order.UserID, &order.Start)
 	if err != nil {
-		p.logger.Error("FromCurrentToDone: order scan error", log.Fields{
+		p.logger.Error("NewDoneOrder: order scan error", log.Fields{
 			"error": err,
 		})
 	}
@@ -157,28 +157,28 @@ func (p Postgres) FromCurrentToDone(orderID int64) {
 
 	err = row.Scan(&doneID)
 	if err != nil {
-		p.logger.Error("FromCurrentToDone: done id scan error", log.Fields{
+		p.logger.Error("NewDoneOrder: done id scan error", log.Fields{
 			"error": err,
 		})
 	}
 
 	_, err = p.DB.Exec("UPDATE products SET current_order_id=null, done_order_id=($1) WHERE current_order_id=($2);", doneID, order.ID)
 	if err != nil {
-		p.logger.Error("FromCurrentToDone: updating products error", log.Fields{
+		p.logger.Error("NewDoneOrder: updating products error", log.Fields{
 			"error": err,
 		})
 	}
 
 	_, err = p.DB.Exec("DELETE FROM current_orders WHERE id=($1);", orderID)
 	if err != nil {
-		p.logger.Error("FromCurrentToDone: deleting current_order error", log.Fields{
+		p.logger.Error("NewDoneOrder: deleting current_order error", log.Fields{
 			"error": err,
 		})
 	}
 	// end transaction
 	err = tx.Commit()
 	if err != nil {
-		p.logger.Error("FromCurrentToDone: commit transaction error", log.Fields{
+		p.logger.Error("NewDoneOrder: commit transaction error", log.Fields{
 			"error": err,
 		})
 	}

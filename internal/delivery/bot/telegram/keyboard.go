@@ -8,17 +8,18 @@ import (
 
 const (
 	// msg texts
-	startText        = "Дарова, бро"
-	addingToCartText = "Отлично! Вы успешно добавили ваш товар в корзину!"
-	customPrintText  = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
-	emptyCartText    = "Ваша корзина пуста =)"
-	newNameText      = "Введите ваше новое имя"
-	newAddressText   = "Введите ваш новый адрес"
-	createOrderText  = "Ваш заказ был успешно создан! Мы начнем делать ваш заказ сразу после того, как вы оплатите заказ на этот номер телефона:"
-	selectTypeText   = "Выберите, что вы хотите заказать"
-	selectSizeText   = "Выберите размер"
-	selectColorText  = "Выберите цвет"
-	infoText         = "Супермегаважная инфа про нас"
+	startText           = "Дарова, бро"
+	addingToCartText    = "Отлично! Вы успешно добавили ваш товар в корзину!"
+	customPrintText     = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
+	emptyCartText       = "Ваша корзина пуста =)"
+	NewNameText         = "Введите ваше новое имя"
+	NewAddressText      = "Введите ваш новый адрес"
+	createOrderText     = "Ваш заказ был успешно создан! Мы начнем делать ваш заказ сразу после того, как вы оплатите заказ на этот номер телефона:"
+	selectTypeText      = "Выберите, что вы хотите заказать"
+	selectSizeText      = "Выберите размер"
+	selectColorText     = "Выберите цвет"
+	missingUserInfoText = "Пожалуйста, заполините информацию о себе в профиле"
+	infoText            = "Супермегаважная инфа про нас"
 
 	// from eng to rus
 	trousers = "штаны"
@@ -49,10 +50,10 @@ func newStartKB() *tgbotapi.InlineKeyboardMarkup {
 func newProdNameKB(path string) *tgbotapi.InlineKeyboardMarkup {
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Штаны", fmt.Sprintf("%s/trousers", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Штаны", fmt.Sprintf("%s/штаны", path)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Толстовка", fmt.Sprintf("%s/hoodie", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Толстовка", fmt.Sprintf("%s/толстовка", path)),
 		),
 	)
 
@@ -62,16 +63,16 @@ func newProdNameKB(path string) *tgbotapi.InlineKeyboardMarkup {
 func newProdColorKB(path string) *tgbotapi.InlineKeyboardMarkup {
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Белый", fmt.Sprintf("%s/white", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Белый", fmt.Sprintf("%s/белый", path)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Черный", fmt.Sprintf("%s/black", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Черный", fmt.Sprintf("%s/черный", path)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Синий", fmt.Sprintf("%s/blue", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Синий", fmt.Sprintf("%s/синий", path)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Серый", fmt.Sprintf("%s/grey", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Серый", fmt.Sprintf("%s/серый", path)),
 		),
 	)
 
