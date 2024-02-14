@@ -516,7 +516,7 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 	// creating order
 	cart := tg.svc.GetCart(userID)
 
-	cartProducts := make([]entities.Product, len(cart))
+	cartProducts := make([]entities.Product, 0, len(cart))
 
 	for _, val := range cart {
 		cartProducts = append(cartProducts, val)

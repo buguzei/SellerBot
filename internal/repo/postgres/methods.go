@@ -88,7 +88,8 @@ func (p Postgres) NewCurrentProducts(order entities.CurrentOrder) error {
 }
 
 func (p Postgres) GetAllCurrentOrders() []entities.CurrentOrder {
-	var orders []entities.CurrentOrder
+	var resOrders []entities.CurrentOrder
+	orderMap := make(map[int64]entities.CurrentOrder)
 
 	rows, err := p.DB.Query("SELECT products.id, name, size, color, text, img, amount, current_orders.id, user_id, start FROM products JOIN current_orders ON products.current_order_id = current_orders.id;")
 	if err != nil {
@@ -123,12 +124,22 @@ func (p Postgres) GetAllCurrentOrders() []entities.CurrentOrder {
 			return nil
 		}
 
-		order.Composition = append(order.Composition, product)
+		if value, ok := orderMap[order.ID]; !ok {
+			order.Composition = append(order.Composition, product)
 
-		orders = append(orders, order)
+			orderMap[order.ID] = order
+		} else {
+			value.Composition = append(value.Composition, product)
+
+			orderMap[order.ID] = value
+		}
 	}
 
-	return orders
+	for _, value := range orderMap {
+		resOrders = append(resOrders, value)
+	}
+
+	return resOrders
 }
 
 func (p Postgres) NewDoneOrder(orderID int64) {
@@ -185,7 +196,8 @@ func (p Postgres) NewDoneOrder(orderID int64) {
 }
 
 func (p Postgres) GetAllDoneOrders() []entities.DoneOrder {
-	var orders []entities.DoneOrder
+	var resOrders []entities.DoneOrder
+	orderMap := make(map[int64]entities.DoneOrder)
 
 	rows, err := p.DB.Query("SELECT products.id, name, size, color, text, img, amount, done_orders.id, user_id, start, done FROM products JOIN done_orders ON products.done_order_id = done_orders.id;")
 	if err != nil {
@@ -221,10 +233,20 @@ func (p Postgres) GetAllDoneOrders() []entities.DoneOrder {
 			return nil
 		}
 
-		order.Composition = append(order.Composition, product)
+		if value, ok := orderMap[order.ID]; !ok {
+			order.Composition = append(order.Composition, product)
 
-		orders = append(orders, order)
+			orderMap[order.ID] = order
+		} else {
+			value.Composition = append(value.Composition, product)
+
+			orderMap[order.ID] = value
+		}
 	}
 
-	return orders
+	for _, value := range orderMap {
+		resOrders = append(resOrders, value)
+	}
+
+	return resOrders
 }

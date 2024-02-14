@@ -8,7 +8,7 @@ import (
 
 const (
 	// msg texts
-	startText           = "Дарова, бро"
+	startText           = "Привет! Это официальный бот бренда \"udobno\". Здесь ты можешь быстро и удобно заказать себе наши товары 🤗"
 	addingToCartText    = "Отлично! Вы успешно добавили ваш товар в корзину!"
 	customPrintText     = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
 	emptyCartText       = "Ваша корзина пуста =)"
@@ -20,13 +20,6 @@ const (
 	selectColorText     = "Выберите цвет"
 	missingUserInfoText = "Пожалуйста, заполините информацию о себе в профиле"
 	infoText            = "Супермегаважная инфа про нас"
-
-	// from eng to rus
-	trousers = "штаны"
-	hoodie   = "толстовка"
-
-	black = "Черный"
-	white = "Белый"
 )
 
 func newStartKB() *tgbotapi.InlineKeyboardMarkup {
@@ -35,8 +28,8 @@ func newStartKB() *tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonData("К покупкам!", "start_shopping"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Ваш профиль", "profile"),
-			tgbotapi.NewInlineKeyboardButtonData("Корзина", "cart"),
+			tgbotapi.NewInlineKeyboardButtonData("Ваш профиль 👤", "profile"),
+			tgbotapi.NewInlineKeyboardButtonData("Корзина 🛍", "cart"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("О нас", "info"),
