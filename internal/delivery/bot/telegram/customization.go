@@ -8,13 +8,14 @@ import (
 
 const (
 	// msg texts
-	startText           = "Привет! Это официальный бот бренда \"udobno\". Здесь ты можешь быстро и удобно заказать себе наши товары 🤗"
+	startText           = "Привет! Это официальный бот бренда \"udobno\". Здесь ты можешь быстро и удобно заказать себе наши товары с нанесением и бесплатной доставкой по всей России 🤗"
 	addingToCartText    = "Отлично! Вы успешно добавили ваш товар в корзину!"
 	customPrintText     = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
 	emptyCartText       = "Ваша корзина пуста =)"
-	NewNameText         = "Введите ваше новое имя"
-	NewAddressText      = "Введите ваш новый адрес"
-	createOrderText     = "Ваш заказ был успешно создан! В комментарии оплаты УКАЖИТЕ ВАШ ID, который указан у вас в профиле. Мы начнем делать ваш заказ сразу после того, как вы оплатите заказ на этот номер телефона: +7 925-321-16-99"
+	newNameText         = "Введите ваше новое имя"
+	newAddressText      = "Введите ваш новый адрес"
+	newPhoneText        = "Введите ваш новый номер телефона"
+	createOrderText     = "Ваш заказ был успешно создан! В комментарии оплаты УКАЖИТЕ ВАШ НОМЕР ТЕЛЕФОНА, который указан у вас в профиле. Мы начнем делать ваш заказ сразу после того, как вы оплатите заказ на этот номер телефона: +7 925-321-16-99"
 	selectTypeText      = "Выберите, что вы хотите заказать"
 	selectSizeText      = "Выберите размер"
 	selectColorText     = "Выберите цвет"
@@ -43,10 +44,10 @@ func newStartKB() *tgbotapi.InlineKeyboardMarkup {
 func newProdNameKB(path string) *tgbotapi.InlineKeyboardMarkup {
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Штаны", fmt.Sprintf("%s/штаны", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Брюки 1990 руб.", fmt.Sprintf("%s/штаны", path)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Толстовка", fmt.Sprintf("%s/толстовка", path)),
+			tgbotapi.NewInlineKeyboardButtonData("Толстовка 1990 руб.", fmt.Sprintf("%s/толстовка", path)),
 		),
 	)
 
@@ -93,7 +94,7 @@ func newProdSizeKB(path string) *tgbotapi.InlineKeyboardMarkup {
 	return &kb
 }
 
-func newCartKB(amount int) *tgbotapi.InlineKeyboardMarkup {
+func cartKB(amount int) *tgbotapi.InlineKeyboardMarkup {
 	strAmount := strconv.Itoa(amount)
 
 	kb := tgbotapi.NewInlineKeyboardMarkup(
@@ -130,7 +131,15 @@ func profileKB() *tgbotapi.InlineKeyboardMarkup {
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Изменить имя", "profile/name"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Изменить адрес", "profile/address"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Изменить телефон", "profile/phone"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Корзина 🛍", "cart"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В главное меню", "home"),

@@ -13,6 +13,8 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 	userID := update.Message.From.ID
 
 	switch tg.cache[userID]["lvl"] {
+	case "phone":
+		tg.phoneLvlHandler(update.Message)
 	case "name":
 		tg.nameLvlHandler(update.Message)
 	case "address":
@@ -59,6 +61,45 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 	}
 }
 
+func (tg TGBot) phoneLvlHandler(message *tgbotapi.Message) {
+	userID := message.From.ID
+
+	user, err := tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("phoneLvlHandler: error getting user", log2.Fields{
+			"error": err,
+		})
+	}
+
+	user.Phone = message.Text
+
+	err = tg.svc.UpdateUser(*user)
+	if err != nil {
+		tg.logger.Error("phoneLvlHandler: error updating user", log2.Fields{
+			"error": err,
+		})
+	}
+
+	user, err = tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("phoneLvlHandler: error getting user", log2.Fields{
+			"error": err,
+		})
+	}
+
+	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\nТелефон: %s", user.Name, user.Address, user.Phone)
+	kb := profileKB()
+
+	err = tg.newMsg(userID, sendText, kb)
+	if err != nil {
+		tg.logger.Error("phoneLvlHandler: error sending message", log2.Fields{
+			"error": err,
+		})
+	}
+
+	delete(tg.cache[userID], "lvl")
+}
+
 func (tg TGBot) nameLvlHandler(message *tgbotapi.Message) {
 	userID := message.From.ID
 
@@ -85,7 +126,7 @@ func (tg TGBot) nameLvlHandler(message *tgbotapi.Message) {
 		})
 	}
 
-	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s", user.Name, user.Address)
+	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\nТелефон: %s", user.Name, user.Address, user.Phone)
 	kb := profileKB()
 
 	err = tg.newMsg(userID, sendText, kb)
@@ -127,7 +168,7 @@ func (tg TGBot) addressLvlHandler(message *tgbotapi.Message) {
 		return
 	}
 
-	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s", user.Name, user.Address)
+	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\n ID: %s", user.Name, user.Address, user.Phone)
 	kb := profileKB()
 
 	err = tg.newMsg(userID, sendText, kb)
@@ -146,8 +187,9 @@ func (tg TGBot) startCommandHandler(message *tgbotapi.Message) {
 
 	err := tg.svc.NewUser(entities.User{
 		ID:      message.From.ID,
-		Name:    "",
-		Address: "",
+		Name:    " ",
+		Address: " ",
+		Phone:   " ",
 	})
 	if err != nil {
 		tg.logger.Error("startCommandHandler: error creating new user", log2.Fields{
@@ -282,7 +324,7 @@ func (tg TGBot) printLvlHandler(update tgbotapi.Update) {
 		fileID := update.Message.Document.FileID
 		fileURL, err := tg.bot.GetFileDirectURL(fileID)
 		if err != nil {
-			tg.logger.Error("printLvlHandler: getting file url error", log2.Fields{
+			tg.logger.Error("printLvlHandler: getting file url for document error", log2.Fields{
 				"error": err,
 			})
 			return
@@ -294,6 +336,20 @@ func (tg TGBot) printLvlHandler(update tgbotapi.Update) {
 
 	if update.Message.Text != "" {
 		tg.cache[userID]["newProd"].(*entities.Product).Text = update.Message.Text
+	}
+
+	if update.Message.Photo != nil {
+		fileID := update.Message.Photo[len(update.Message.Photo)-1].FileID
+
+		fileURL, err := tg.bot.GetFileDirectURL(fileID)
+		if err != nil {
+			tg.logger.Error("printLvlHandler: getting file url for photo error", log2.Fields{
+				"error": err,
+			})
+			return
+		}
+
+		tg.cache[userID]["newProd"].(*entities.Product).Img = fileURL
 	}
 
 	tg.cache[userID]["newProd"].(*entities.Product).Amount = 1

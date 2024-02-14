@@ -87,7 +87,7 @@ func (tg TGBot) getProfileHandler(callback *tgbotapi.CallbackQuery) {
 		})
 	}
 
-	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\nID: %d", user.Name, user.Address, user.ID)
+	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\nТелефон: %s", user.Name, user.Address, user.Phone)
 	kb := profileKB()
 
 	err = tg.newEditMsgByDelete(userID, sendText, kb)
@@ -105,14 +105,18 @@ func (tg TGBot) changeProfileHandler(callback *tgbotapi.CallbackQuery, data stri
 
 	var sendText string
 	switch split[1] {
+	case "phone":
+		tg.cache[userID]["lvl"] = "phone"
+
+		sendText = newPhoneText
 	case "name":
 		tg.cache[userID]["lvl"] = "name"
 
-		sendText = NewNameText
+		sendText = newNameText
 	case "address":
 		tg.cache[userID]["lvl"] = "address"
 
-		sendText = NewAddressText
+		sendText = newAddressText
 	}
 
 	err := tg.newEditMsgByDelete(userID, sendText, nil)
@@ -188,7 +192,7 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 		)
 	}
 
-	kb = newCartKB(currentProd.Amount)
+	kb = cartKB(currentProd.Amount)
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
@@ -279,7 +283,7 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 		)
 	}
 
-	kb = newCartKB(currentProd.Amount)
+	kb = cartKB(currentProd.Amount)
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
@@ -308,7 +312,7 @@ func (tg TGBot) increaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 
 	tg.svc.NewCartProduct(userID, keys[idx], *currentProd)
 
-	kb := newCartKB(currentProd.Amount)
+	kb := cartKB(currentProd.Amount)
 
 	if err := tg.newEditMsgKeyboard(userID, kb); err != nil {
 		tg.logger.Error("increaseProductAmountHandler: new edit msg keyboard procedure failed", log2.Fields{
@@ -343,7 +347,7 @@ func (tg TGBot) decreaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 		})
 	}
 
-	kb := newCartKB(currentProd.Amount)
+	kb := cartKB(currentProd.Amount)
 
 	if err = tg.newEditMsgKeyboard(userID, kb); err != nil {
 		tg.logger.Error("decreaseProductAmountHandler: new edit msg keyboard procedure failed", log2.Fields{
@@ -407,7 +411,7 @@ func (tg TGBot) moveCartToRightHandler(callback *tgbotapi.CallbackQuery) {
 		)
 	}
 
-	kb = newCartKB(currentProd.Amount)
+	kb = cartKB(currentProd.Amount)
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
@@ -474,7 +478,7 @@ func (tg TGBot) moveCartToLeftHandler(callback *tgbotapi.CallbackQuery) {
 		)
 	}
 
-	kb = newCartKB(currentProd.Amount)
+	kb = cartKB(currentProd.Amount)
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
@@ -591,8 +595,8 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 		})
 	}
 
-	if user.Name == "" || user.Address == "" {
-		tg.newAlert(callback.ID, missingUserInfoText)
+	if user.Name == " " || user.Address == " " || user.Phone == " " {
+		tg.getProfileHandler(callback)
 		return
 	}
 

@@ -3,6 +3,7 @@
 CREATE TABLE users (
     id bigint primary key not null,
     name text,
+    phone text,
     address text
 );
 

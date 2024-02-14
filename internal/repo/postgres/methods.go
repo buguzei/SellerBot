@@ -9,7 +9,7 @@ import (
 // user methods
 
 func (p Postgres) InsertUser(user entities.User) error {
-	_, err := p.DB.Exec("INSERT INTO users VALUES ($1) ON CONFLICT DO NOTHING;", user.ID)
+	_, err := p.DB.Exec("INSERT INTO users VALUES (($1), ($2), ($3), ($4)) ON CONFLICT DO NOTHING;", user.ID, user.Name, user.Phone, user.Address)
 
 	if err != nil {
 		p.logger.Error("InsertUser: insert error", log.Fields{
@@ -27,7 +27,7 @@ func (p Postgres) GetUser(userID int64) (*entities.User, error) {
 
 	row := p.DB.QueryRow("SELECT * FROM users WHERE id=($1)", userID)
 
-	err := row.Scan(&user.ID, &user.Name, &user.Address)
+	err := row.Scan(&user.ID, &user.Name, &user.Phone, &user.Address)
 	if err != nil {
 		p.logger.Error("GetUser: scan error", log.Fields{
 			"error": err,
@@ -40,7 +40,7 @@ func (p Postgres) GetUser(userID int64) (*entities.User, error) {
 }
 
 func (p Postgres) UpdateUser(user entities.User) error {
-	_, err := p.DB.Exec("UPDATE users SET name = ($1), address = ($2) WHERE id=($3);", user.Name, user.Address, user.ID)
+	_, err := p.DB.Exec("UPDATE users SET name = ($1), address = ($2), phone=($3) WHERE id=($4);", user.Name, user.Address, user.Phone, user.ID)
 
 	if err != nil {
 		p.logger.Error("UpdateUser: update error", log.Fields{
