@@ -149,7 +149,7 @@ func (tg TGBot) currentCommandHandler(message *tgbotapi.Message) {
 			)
 		}
 
-		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата заказа: %v%s\n\n/done_%d", user.Name, user.Address, order.Start, productText, order.ID)
+		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\nДата заказа: %s%v\n\n/done_%d", user.Name, user.Address, fmt.Sprintf("%d.%d.%d", order.Start.Day(), order.Start.Month(), order.Start.Year()), productText, order.ID)
 
 		err := tg.newMsg(userID, sendText, nil)
 		if err != nil {
@@ -182,7 +182,7 @@ func (tg TGBot) doneCommandHandler(message *tgbotapi.Message) {
 			)
 		}
 
-		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата создания заказа: %v\nДата выполнения заказа: %v%s", user.Name, user.Address, order.Start, order.Done, productText)
+		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата создания заказа: %s\nДата выполнения заказа: %s%s", user.Name, user.Address, fmt.Sprintf("%d.%d.%d", order.Start.Day(), order.Start.Month(), order.Start.Year()), fmt.Sprintf("%d.%d.%d", order.Done.Day(), order.Done.Month(), order.Done.Year()), productText)
 
 		err := tg.newMsg(userID, sendText, nil)
 		if err != nil {

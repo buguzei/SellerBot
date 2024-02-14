@@ -82,7 +82,7 @@ func (tg TGBot) getProfileHandler(callback *tgbotapi.CallbackQuery) {
 
 	user := tg.svc.GetUser(userID)
 
-	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s", user.Name, user.Address)
+	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\nID: %d", user.Name, user.Address, user.ID)
 	kb := profileKB()
 
 	err := tg.newEditMsgByDelete(userID, sendText, kb)
@@ -446,7 +446,7 @@ func (tg TGBot) productNameHandler(callback *tgbotapi.CallbackQuery, data string
 	switch split[1] {
 	case "толстовка":
 		tg.cache[userID]["newProd"] = &entities.Product{Name: "толстовка"}
-		photoFile = "белый_штаны.jpg"
+		photoFile = "белый_толстовка.jpg"
 	case "штаны":
 		tg.cache[userID]["newProd"] = &entities.Product{Name: "штаны"}
 		photoFile = "белый_штаны.jpg"
