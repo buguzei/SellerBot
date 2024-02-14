@@ -62,23 +62,37 @@ func (tg TGBot) HandleMessage(update tgbotapi.Update) {
 func (tg TGBot) nameLvlHandler(message *tgbotapi.Message) {
 	userID := message.From.ID
 
-	user := tg.svc.GetUser(userID)
+	user, err := tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("nameLvlHandler: error getting user", log2.Fields{
+			"error": err,
+		})
+	}
 
 	user.Name = message.Text
 
-	tg.svc.UpdateUser(*user)
+	err = tg.svc.UpdateUser(*user)
+	if err != nil {
+		tg.logger.Error("nameLvlHandler: error updating user", log2.Fields{
+			"error": err,
+		})
+	}
 
-	user = tg.svc.GetUser(userID)
+	user, err = tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("nameLvlHandler: error getting user", log2.Fields{
+			"error": err,
+		})
+	}
 
 	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s", user.Name, user.Address)
 	kb := profileKB()
 
-	err := tg.newMsg(userID, sendText, kb)
+	err = tg.newMsg(userID, sendText, kb)
 	if err != nil {
 		tg.logger.Error("nameLvlHandler: error sending message", log2.Fields{
 			"error": err,
 		})
-		return
 	}
 
 	delete(tg.cache[userID], "lvl")
@@ -87,18 +101,36 @@ func (tg TGBot) nameLvlHandler(message *tgbotapi.Message) {
 func (tg TGBot) addressLvlHandler(message *tgbotapi.Message) {
 	userID := message.From.ID
 
-	user := tg.svc.GetUser(userID)
+	user, err := tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("addressLvlHandler: error getting user", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 
 	user.Address = message.Text
 
-	tg.svc.UpdateUser(*user)
+	err = tg.svc.UpdateUser(*user)
+	if err != nil {
+		tg.logger.Error("addressLvlHandler: error updating user", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 
-	user = tg.svc.GetUser(userID)
+	user, err = tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("addressLvlHandler: error getting user", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 
 	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s", user.Name, user.Address)
 	kb := profileKB()
 
-	err := tg.newMsg(userID, sendText, kb)
+	err = tg.newMsg(userID, sendText, kb)
 	if err != nil {
 		tg.logger.Error("addressLvlHandler: error sending message", log2.Fields{
 			"error": err,
@@ -112,13 +144,19 @@ func (tg TGBot) addressLvlHandler(message *tgbotapi.Message) {
 func (tg TGBot) startCommandHandler(message *tgbotapi.Message) {
 	userID := message.From.ID
 
-	tg.svc.NewUser(entities.User{
+	err := tg.svc.NewUser(entities.User{
 		ID:      message.From.ID,
 		Name:    "",
 		Address: "",
 	})
+	if err != nil {
+		tg.logger.Error("startCommandHandler: error creating new user", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 
-	err := tg.newMsg(userID, startText, newStartKB())
+	err = tg.newMsg(userID, startText, newStartKB())
 	if err != nil {
 		tg.logger.Error("startCommandHandler: error sending message", log2.Fields{
 			"error": err,
@@ -130,11 +168,22 @@ func (tg TGBot) startCommandHandler(message *tgbotapi.Message) {
 func (tg TGBot) currentCommandHandler(message *tgbotapi.Message) {
 	userID := message.From.ID
 
-	orders := tg.svc.GetAllCurrentOrders()
+	orders, err := tg.svc.GetAllCurrentOrders()
+	if err != nil {
+		tg.logger.Error("currentCommandHandler: error getting current orders", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 
 	for _, order := range orders {
-
-		user := tg.svc.GetUser(order.UserID)
+		user, err := tg.svc.GetUser(order.UserID)
+		if err != nil {
+			tg.logger.Error("currentCommandHandler: error getting user", log2.Fields{
+				"error": err,
+			})
+			return
+		}
 
 		var productText string
 
@@ -151,7 +200,7 @@ func (tg TGBot) currentCommandHandler(message *tgbotapi.Message) {
 
 		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\nДата заказа: %s%v\n\n/done_%d", user.Name, user.Address, fmt.Sprintf("%d.%d.%d", order.Start.Day(), order.Start.Month(), order.Start.Year()), productText, order.ID)
 
-		err := tg.newMsg(userID, sendText, nil)
+		err = tg.newMsg(userID, sendText, nil)
 		if err != nil {
 			tg.logger.Error("currentCommandHandler: error sending message", log2.Fields{
 				"error": err,
@@ -164,10 +213,22 @@ func (tg TGBot) currentCommandHandler(message *tgbotapi.Message) {
 func (tg TGBot) doneCommandHandler(message *tgbotapi.Message) {
 	userID := message.From.ID
 
-	orders := tg.svc.GetAllDoneOrders()
+	orders, err := tg.svc.GetAllDoneOrders()
+	if err != nil {
+		tg.logger.Error("doneCommandHandler: error getting all done orders", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 
 	for _, order := range orders {
-		user := tg.svc.GetUser(order.UserID)
+		user, err := tg.svc.GetUser(order.UserID)
+		if err != nil {
+			tg.logger.Error("doneCommandHandler: error getting user", log2.Fields{
+				"error": err,
+			})
+			return
+		}
 
 		var productText string
 
@@ -184,7 +245,7 @@ func (tg TGBot) doneCommandHandler(message *tgbotapi.Message) {
 
 		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\n\nЗаказ:\nДата создания заказа: %s\nДата выполнения заказа: %s%s", user.Name, user.Address, fmt.Sprintf("%d.%d.%d", order.Start.Day(), order.Start.Month(), order.Start.Year()), fmt.Sprintf("%d.%d.%d", order.Done.Day(), order.Done.Month(), order.Done.Year()), productText)
 
-		err := tg.newMsg(userID, sendText, nil)
+		err = tg.newMsg(userID, sendText, nil)
 		if err != nil {
 			tg.logger.Error("doneCommandHandler: error sending message", log2.Fields{
 				"error": err,
@@ -200,9 +261,16 @@ func (tg TGBot) done_xCommandHandler(split []string) {
 		tg.logger.Error("done_xCommandHandler: error converting string to int", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
-	tg.svc.NewDoneOrder(int64(orderID))
+	err = tg.svc.NewDoneOrder(int64(orderID))
+	if err != nil {
+		tg.logger.Error("done_xCommandHandler: error creating done order", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 }
 
 func (tg TGBot) printLvlHandler(update tgbotapi.Update) {
@@ -217,6 +285,7 @@ func (tg TGBot) printLvlHandler(update tgbotapi.Update) {
 			tg.logger.Error("printLvlHandler: getting file url error", log2.Fields{
 				"error": err,
 			})
+			return
 		}
 
 		// adding product to cart
@@ -237,13 +306,20 @@ func (tg TGBot) printLvlHandler(update tgbotapi.Update) {
 	}
 
 	// adding product to cart
-	tg.svc.NewCartProduct(userID, tg.cache[userID]["prodIdx"].(int), *tg.cache[userID]["newProd"].(*entities.Product))
+	err := tg.svc.NewCartProduct(userID, tg.cache[userID]["prodIdx"].(int), *tg.cache[userID]["newProd"].(*entities.Product))
+	if err != nil {
+		tg.logger.Error("printLvlHandler: new product in cart error", log2.Fields{
+			"error": err,
+		})
+		return
+	}
 
-	err := tg.newMsg(userID, addingToCartText, backToStartKB())
+	err = tg.newMsg(userID, addingToCartText, backToStartKB())
 	if err != nil {
 		tg.logger.Error("printLvlHandler: new msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	delete(tg.cache[userID], "newProd")

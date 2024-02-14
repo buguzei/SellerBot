@@ -22,7 +22,7 @@ func (p Postgres) InsertUser(user entities.User) error {
 	return nil
 }
 
-func (p Postgres) GetUser(userID int64) *entities.User {
+func (p Postgres) GetUser(userID int64) (*entities.User, error) {
 	var user entities.User
 
 	row := p.DB.QueryRow("SELECT * FROM users WHERE id=($1)", userID)
@@ -32,19 +32,25 @@ func (p Postgres) GetUser(userID int64) *entities.User {
 		p.logger.Error("GetUser: scan error", log.Fields{
 			"error": err,
 		})
+
+		return nil, err
 	}
 
-	return &user
+	return &user, nil
 }
 
-func (p Postgres) UpdateUser(user entities.User) {
+func (p Postgres) UpdateUser(user entities.User) error {
 	_, err := p.DB.Exec("UPDATE users SET name = ($1), address = ($2) WHERE id=($3);", user.Name, user.Address, user.ID)
 
 	if err != nil {
 		p.logger.Error("UpdateUser: update error", log.Fields{
 			"error": err,
 		})
+
+		return err
 	}
+
+	return nil
 }
 
 // order methods
@@ -87,7 +93,7 @@ func (p Postgres) NewCurrentProducts(order entities.CurrentOrder) error {
 	return nil
 }
 
-func (p Postgres) GetAllCurrentOrders() []entities.CurrentOrder {
+func (p Postgres) GetAllCurrentOrders() ([]entities.CurrentOrder, error) {
 	var resOrders []entities.CurrentOrder
 	orderMap := make(map[int64]entities.CurrentOrder)
 
@@ -97,7 +103,7 @@ func (p Postgres) GetAllCurrentOrders() []entities.CurrentOrder {
 			"error": err,
 		})
 
-		return nil
+		return nil, err
 	}
 
 	for rows.Next() {
@@ -121,7 +127,7 @@ func (p Postgres) GetAllCurrentOrders() []entities.CurrentOrder {
 				"error": err,
 			})
 
-			return nil
+			return nil, err
 		}
 
 		if value, ok := orderMap[order.ID]; !ok {
@@ -139,15 +145,17 @@ func (p Postgres) GetAllCurrentOrders() []entities.CurrentOrder {
 		resOrders = append(resOrders, value)
 	}
 
-	return resOrders
+	return resOrders, nil
 }
 
-func (p Postgres) NewDoneOrder(orderID int64) {
+func (p Postgres) NewDoneOrder(orderID int64) error {
 	tx, err := p.DB.Begin()
 	if err != nil {
 		p.logger.Error("NewDoneOrder: begin transaction error", log.Fields{
 			"error": err,
 		})
+
+		return err
 	}
 	// start transaction
 
@@ -160,6 +168,8 @@ func (p Postgres) NewDoneOrder(orderID int64) {
 		p.logger.Error("NewDoneOrder: order scan error", log.Fields{
 			"error": err,
 		})
+
+		return err
 	}
 
 	row = p.DB.QueryRow("INSERT INTO done_orders(user_id, start, done) VALUES (($1), ($2), ($3)) RETURNING done_orders.id;", order.UserID, order.Start, time.Now())
@@ -171,6 +181,8 @@ func (p Postgres) NewDoneOrder(orderID int64) {
 		p.logger.Error("NewDoneOrder: done id scan error", log.Fields{
 			"error": err,
 		})
+
+		return err
 	}
 
 	_, err = p.DB.Exec("UPDATE products SET current_order_id=null, done_order_id=($1) WHERE current_order_id=($2);", doneID, order.ID)
@@ -178,6 +190,8 @@ func (p Postgres) NewDoneOrder(orderID int64) {
 		p.logger.Error("NewDoneOrder: updating products error", log.Fields{
 			"error": err,
 		})
+
+		return err
 	}
 
 	_, err = p.DB.Exec("DELETE FROM current_orders WHERE id=($1);", orderID)
@@ -185,6 +199,8 @@ func (p Postgres) NewDoneOrder(orderID int64) {
 		p.logger.Error("NewDoneOrder: deleting current_order error", log.Fields{
 			"error": err,
 		})
+
+		return err
 	}
 	// end transaction
 	err = tx.Commit()
@@ -192,10 +208,14 @@ func (p Postgres) NewDoneOrder(orderID int64) {
 		p.logger.Error("NewDoneOrder: commit transaction error", log.Fields{
 			"error": err,
 		})
+
+		return err
 	}
+
+	return nil
 }
 
-func (p Postgres) GetAllDoneOrders() []entities.DoneOrder {
+func (p Postgres) GetAllDoneOrders() ([]entities.DoneOrder, error) {
 	var resOrders []entities.DoneOrder
 	orderMap := make(map[int64]entities.DoneOrder)
 
@@ -205,7 +225,7 @@ func (p Postgres) GetAllDoneOrders() []entities.DoneOrder {
 			"error": err,
 		})
 
-		return nil
+		return nil, err
 	}
 
 	for rows.Next() {
@@ -230,7 +250,7 @@ func (p Postgres) GetAllDoneOrders() []entities.DoneOrder {
 				"error": err,
 			})
 
-			return nil
+			return nil, err
 		}
 
 		if value, ok := orderMap[order.ID]; !ok {
@@ -248,5 +268,5 @@ func (p Postgres) GetAllDoneOrders() []entities.DoneOrder {
 		resOrders = append(resOrders, value)
 	}
 
-	return resOrders
+	return resOrders, nil
 }

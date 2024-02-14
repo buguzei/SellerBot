@@ -31,7 +31,7 @@ func main() {
 		}
 	}()
 
-	redis := redis2.NewRedis()
+	redis := redis2.NewRedis(logger)
 	defer func() {
 		err = redis.Client.Close()
 		if err != nil {

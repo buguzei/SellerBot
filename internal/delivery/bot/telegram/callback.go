@@ -80,12 +80,17 @@ func (tg TGBot) infoHandler(callback *tgbotapi.CallbackQuery) {
 func (tg TGBot) getProfileHandler(callback *tgbotapi.CallbackQuery) {
 	userID := callback.From.ID
 
-	user := tg.svc.GetUser(userID)
+	user, err := tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("getProfileHandler: getting user failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\nID: %d", user.Name, user.Address, user.ID)
 	kb := profileKB()
 
-	err := tg.newEditMsgByDelete(userID, sendText, kb)
+	err = tg.newEditMsgByDelete(userID, sendText, kb)
 	if err != nil {
 		tg.logger.Error("getProfileHandler: new edit msg procedure failed", log2.Fields{
 			"error": err,
@@ -124,12 +129,24 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 	var sendText string
 	var kb *tgbotapi.InlineKeyboardMarkup
 
-	if tg.svc.CartLen(userID) == 0 {
+	cartLen, err := tg.svc.CartLen(userID)
+	if err != nil {
+		tg.logger.Error("startCartHandler: getting cart len failed", log2.Fields{
+			"error": err,
+		})
+	}
+
+	if *cartLen == 0 {
 		tg.newAlert(callback.ID, emptyCartText)
 		return
 	}
 
-	cart := tg.svc.GetCart(userID)
+	cart, err := tg.svc.GetCart(userID)
+	if err != nil {
+		tg.logger.Error("startCartHandler: getting cart failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	tg.cache[userID]["keys"] = make([]int, 0, len(cart))
 
@@ -142,7 +159,12 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 	keys := tg.cache[userID]["keys"].([]int)
 	idx := tg.cache[userID]["idx"].(int)
 
-	currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+	currentProd, err := tg.svc.GetCartProduct(userID, keys[idx])
+	if err != nil {
+		tg.logger.Error("startCartHandler: getting cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	if currentProd.Text != "" {
 		sendText = fmt.Sprintf("Ваша корзина.\n\n%d из %d\n\nКатегория: %s\nЦвет: %s\nРазмер: %s\nТекст: %s",
@@ -170,7 +192,7 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
-	err := tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
+	err = tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
 	if err != nil {
 		tg.logger.Error("startCartHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
@@ -189,7 +211,14 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 
 	tg.svc.DeleteProductFromCart(userID, keys[idx])
 
-	if tg.svc.CartLen(userID) == 0 {
+	cartLen, err := tg.svc.CartLen(userID)
+	if err != nil {
+		tg.logger.Error("deleteProductFromCartHandler: getting cart len failed", log2.Fields{
+			"error": err,
+		})
+	}
+
+	if *cartLen == 0 {
 		sendText = startText
 		kb = newStartKB()
 
@@ -203,7 +232,12 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 		return
 	}
 
-	cart := tg.svc.GetCart(userID)
+	cart, err := tg.svc.GetCart(userID)
+	if err != nil {
+		tg.logger.Error("deleteProductFromCartHandler: getting cart failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	tg.cache[userID]["keys"] = make([]int, 0, len(cart))
 
@@ -216,7 +250,12 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 	keys = tg.cache[userID]["keys"].([]int)
 	idx = tg.cache[userID]["idx"].(int)
 
-	currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+	currentProd, err := tg.svc.GetCartProduct(userID, keys[idx])
+	if err != nil {
+		tg.logger.Error("deleteProductFromCartHandler: getting cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	if currentProd.Text != "" {
 		sendText = fmt.Sprintf("Ваша корзина.\n\n%d из %d\n\nКатегория: %s\nЦвет: %s\nРазмер: %s\nТекст: %s",
@@ -244,7 +283,7 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
-	err := tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
+	err = tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
 	if err != nil {
 		tg.logger.Error("deleteProductFromCartHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
@@ -258,11 +297,16 @@ func (tg TGBot) increaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 	keys := tg.cache[userID]["keys"].([]int)
 	idx := tg.cache[userID]["idx"].(int)
 
-	currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+	currentProd, err := tg.svc.GetCartProduct(userID, keys[idx])
+	if err != nil {
+		tg.logger.Error("increaseProductAmountHandler: getting cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	currentProd.Amount++
 
-	tg.svc.NewCartProduct(userID, keys[idx], currentProd)
+	tg.svc.NewCartProduct(userID, keys[idx], *currentProd)
 
 	kb := newCartKB(currentProd.Amount)
 
@@ -279,7 +323,12 @@ func (tg TGBot) decreaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 	keys := tg.cache[userID]["keys"].([]int)
 	idx := tg.cache[userID]["idx"].(int)
 
-	currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+	currentProd, err := tg.svc.GetCartProduct(userID, keys[idx])
+	if err != nil {
+		tg.logger.Error("decreaseProductAmountHandler: getting cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	if currentProd.Amount == 1 {
 		return
@@ -287,11 +336,16 @@ func (tg TGBot) decreaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 
 	currentProd.Amount--
 
-	tg.svc.NewCartProduct(userID, keys[idx], currentProd)
+	err = tg.svc.NewCartProduct(userID, keys[idx], *currentProd)
+	if err != nil {
+		tg.logger.Error("decreaseProductAmountHandler: new cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	kb := newCartKB(currentProd.Amount)
 
-	if err := tg.newEditMsgKeyboard(userID, kb); err != nil {
+	if err = tg.newEditMsgKeyboard(userID, kb); err != nil {
 		tg.logger.Error("decreaseProductAmountHandler: new edit msg keyboard procedure failed", log2.Fields{
 			"error": err,
 		})
@@ -304,11 +358,18 @@ func (tg TGBot) moveCartToRightHandler(callback *tgbotapi.CallbackQuery) {
 	var sendText string
 	var kb *tgbotapi.InlineKeyboardMarkup
 
-	if tg.svc.CartLen(userID) == 1 {
+	cartLen, err := tg.svc.CartLen(userID)
+	if err != nil {
+		tg.logger.Error("moveCartToRightHandler: getting cart len failed", log2.Fields{
+			"error": err,
+		})
+	}
+
+	if *cartLen == 1 {
 		return
 	}
 
-	if tg.cache[userID]["idx"] == int(tg.svc.CartLen(userID))-1 {
+	if tg.cache[userID]["idx"] == int(*cartLen)-1 {
 		tg.cache[userID]["idx"] = 0
 	} else {
 		tg.cache[userID]["idx"] = tg.cache[userID]["idx"].(int) + 1
@@ -317,7 +378,12 @@ func (tg TGBot) moveCartToRightHandler(callback *tgbotapi.CallbackQuery) {
 	keys := tg.cache[userID]["keys"].([]int)
 	idx := tg.cache[userID]["idx"].(int)
 
-	currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+	currentProd, err := tg.svc.GetCartProduct(userID, keys[idx])
+	if err != nil {
+		tg.logger.Error("moveCartToRightHandler: getting cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	if currentProd.Text != "" {
 		sendText = fmt.Sprintf("Ваша корзина.\n\n%d из %d\n\nКатегория: %s\nЦвет: %s\nРазмер: %s\nТекст: %s",
@@ -345,7 +411,7 @@ func (tg TGBot) moveCartToRightHandler(callback *tgbotapi.CallbackQuery) {
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
-	err := tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
+	err = tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
 	if err != nil {
 		tg.logger.Error("moveCartToRightHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
@@ -359,12 +425,19 @@ func (tg TGBot) moveCartToLeftHandler(callback *tgbotapi.CallbackQuery) {
 	var sendText string
 	var kb *tgbotapi.InlineKeyboardMarkup
 
-	if tg.svc.CartLen(userID) == 1 {
+	cartLen, err := tg.svc.CartLen(userID)
+	if err != nil {
+		tg.logger.Error("moveCartToLeftHandler: getting cart len failed", log2.Fields{
+			"error": err,
+		})
+	}
+
+	if *cartLen == 1 {
 		return
 	}
 
 	if tg.cache[userID]["idx"] == 0 {
-		tg.cache[userID]["idx"] = int(tg.svc.CartLen(userID)) - 1
+		tg.cache[userID]["idx"] = int(*cartLen) - 1
 	} else {
 		tg.cache[userID]["idx"] = tg.cache[userID]["idx"].(int) - 1
 	}
@@ -372,7 +445,12 @@ func (tg TGBot) moveCartToLeftHandler(callback *tgbotapi.CallbackQuery) {
 	keys := tg.cache[userID]["keys"].([]int)
 	idx := tg.cache[userID]["idx"].(int)
 
-	currentProd := tg.svc.GetCartProduct(userID, keys[idx])
+	currentProd, err := tg.svc.GetCartProduct(userID, keys[idx])
+	if err != nil {
+		tg.logger.Error("moveCartToLeftHandler: getting cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	if currentProd.Text != "" {
 		sendText = fmt.Sprintf("Ваша корзина.\n\n%d из %d\n\nКатегория: %s\nЦвет: %s\nРазмер: %s\nТекст: %s",
@@ -400,7 +478,7 @@ func (tg TGBot) moveCartToLeftHandler(callback *tgbotapi.CallbackQuery) {
 
 	photoFile := fmt.Sprintf("%s_%s.jpg", currentProd.Color, currentProd.Name)
 
-	err := tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
+	err = tg.newEditPhotoByDelete(userID, tgbotapi.FilePath("././././assets/"+photoFile), sendText, kb)
 	if err != nil {
 		tg.logger.Error("moveCartToLeftHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
@@ -506,7 +584,12 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 	userID := callback.From.ID
 
 	// check user
-	user := tg.svc.GetUser(userID)
+	user, err := tg.svc.GetUser(userID)
+	if err != nil {
+		tg.logger.Error("designOrderHandler: getting user failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	if user.Name == "" || user.Address == "" {
 		tg.newAlert(callback.ID, missingUserInfoText)
@@ -514,7 +597,12 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 	}
 
 	// creating order
-	cart := tg.svc.GetCart(userID)
+	cart, err := tg.svc.GetCart(userID)
+	if err != nil {
+		tg.logger.Error("designOrderHandler: getting cart failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	cartProducts := make([]entities.Product, 0, len(cart))
 
@@ -530,7 +618,7 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 
 	tg.cache[userID]["idx"] = 0
 
-	err := tg.svc.NewCurrentOrder(order)
+	err = tg.svc.NewCurrentOrder(order)
 	if err != nil {
 		log.Println(err)
 	}

@@ -10,7 +10,7 @@ import (
 func (s Svc) NewUser(user entities.User) error {
 	err := s.db.InsertUser(user)
 	if err != nil {
-		s.logger.Error("adding new user to db failed", log.Fields{
+		s.logger.Error("NewUser: adding new user to db failed", log.Fields{
 			"error": err,
 		})
 
@@ -20,37 +20,84 @@ func (s Svc) NewUser(user entities.User) error {
 	return nil
 }
 
-func (s Svc) GetUser(userID int64) *entities.User {
-	user := s.db.GetUser(userID)
+func (s Svc) GetUser(userID int64) (*entities.User, error) {
+	user, err := s.db.GetUser(userID)
+	if err != nil {
+		s.logger.Error("GetUser: getting user from db failed", log.Fields{
+			"error": err,
+		})
 
-	return user
+		return nil, err
+	}
+
+	return user, nil
 }
 
-func (s Svc) UpdateUser(user entities.User) {
-	s.db.UpdateUser(user)
+func (s Svc) UpdateUser(user entities.User) error {
+	err := s.db.UpdateUser(user)
+	if err != nil {
+		s.logger.Error("UpdateUser: updating user failed", log.Fields{
+			"error": err,
+		})
+
+		return err
+	}
+
+	return nil
 }
 
 // cart methods
 
-func (s Svc) NewCartProduct(userID int64, idx int, product entities.Product) {
-	s.db.NewCartProduct(userID, idx, product)
+func (s Svc) NewCartProduct(userID int64, idx int, product entities.Product) error {
+	err := s.db.NewCartProduct(userID, idx, product)
+	if err != nil {
+		s.logger.Error("NewCartProduct: new product in cart failed", log.Fields{
+			"error": err,
+		})
+
+		return err
+	}
+
+	return nil
 }
 
-func (s Svc) CartLen(userID int64) int64 {
-	length := s.db.CartLen(userID)
+func (s Svc) CartLen(userID int64) (*int64, error) {
+	length, err := s.db.CartLen(userID)
+	if err != nil {
+		s.logger.Error("CartLen: getting cart len failed", log.Fields{
+			"error": err,
+		})
 
-	return length
+		return nil, err
+	}
+
+	return length, nil
 }
 
-func (s Svc) GetCartProduct(userID int64, idx int) entities.Product {
-	prod := s.db.GetCartProduct(userID, idx)
+func (s Svc) GetCartProduct(userID int64, idx int) (*entities.Product, error) {
+	prod, err := s.db.GetCartProduct(userID, idx)
+	if err != nil {
+		s.logger.Error("GetCartProduct: getting product failed", log.Fields{
+			"error": err,
+		})
 
-	return prod
+		return nil, err
+	}
+
+	return prod, nil
 }
 
-func (s Svc) GetCart(userID int64) map[int]entities.Product {
-	cart := s.db.GetCart(userID)
-	return cart
+func (s Svc) GetCart(userID int64) (map[int]entities.Product, error) {
+	cart, err := s.db.GetCart(userID)
+	if err != nil {
+		s.logger.Error("GetCart: getting cart failed", log.Fields{
+			"error": err,
+		})
+
+		return nil, err
+	}
+
+	return cart, nil
 }
 
 func (s Svc) DeleteProductFromCart(userID int64, idx int) {
@@ -85,18 +132,41 @@ func (s Svc) NewCurrentOrder(order entities.CurrentOrder) error {
 	return nil
 }
 
-func (s Svc) GetAllCurrentOrders() []entities.CurrentOrder {
-	orders := s.db.GetAllCurrentOrders()
+func (s Svc) GetAllCurrentOrders() ([]entities.CurrentOrder, error) {
+	orders, err := s.db.GetAllCurrentOrders()
+	if err != nil {
+		s.logger.Error("GetAllCurrentOrders: getting orders from db failed", log.Fields{
+			"error": err,
+		})
 
-	return orders
+		return nil, err
+	}
+
+	return orders, nil
 }
 
-func (s Svc) NewDoneOrder(orderID int64) {
-	s.db.NewDoneOrder(orderID)
+func (s Svc) NewDoneOrder(orderID int64) error {
+	err := s.db.NewDoneOrder(orderID)
+	if err != nil {
+		s.logger.Error("NewDoneOrder: new done order error", log.Fields{
+			"error": err,
+		})
+
+		return err
+	}
+
+	return nil
 }
 
-func (s Svc) GetAllDoneOrders() []entities.DoneOrder {
-	orders := s.db.GetAllDoneOrders()
+func (s Svc) GetAllDoneOrders() ([]entities.DoneOrder, error) {
+	orders, err := s.db.GetAllDoneOrders()
+	if err != nil {
+		s.logger.Error("GetAllDoneOrders: getting done orders failed", log.Fields{
+			"error": err,
+		})
 
-	return orders
+		return nil, err
+	}
+
+	return orders, nil
 }

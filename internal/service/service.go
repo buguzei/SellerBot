@@ -25,21 +25,21 @@ func NewService(db repo.Repo) Svc {
 
 type UserSvc interface {
 	NewUser(entities.User) error
-	GetUser(int64) *entities.User
-	UpdateUser(entities.User)
+	GetUser(int64) (*entities.User, error)
+	UpdateUser(entities.User) error
 }
 
 type OrderSvc interface {
 	NewCurrentOrder(entities.CurrentOrder) error
-	GetAllCurrentOrders() []entities.CurrentOrder
-	GetAllDoneOrders() []entities.DoneOrder
-	NewDoneOrder(int64)
+	GetAllCurrentOrders() ([]entities.CurrentOrder, error)
+	GetAllDoneOrders() ([]entities.DoneOrder, error)
+	NewDoneOrder(int64) error
 }
 
 type CartSvc interface {
-	NewCartProduct(int64, int, entities.Product)
-	CartLen(int64) int64
-	GetCartProduct(int64, int) entities.Product
-	GetCart(int64) map[int]entities.Product
+	NewCartProduct(int64, int, entities.Product) error
+	CartLen(int64) (*int64, error)
+	GetCartProduct(int64, int) (*entities.Product, error)
+	GetCart(int64) (map[int]entities.Product, error)
 	DeleteProductFromCart(int64, int)
 }
