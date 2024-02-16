@@ -4,11 +4,7 @@ import (
 	"bot/internal/entities"
 )
 
-type Repo interface {
-	UserRepo
-	CartRepo
-	OrderRepo
-}
+//go:generate mockgen -source=./repo.go -destination=./mocks/repository-mock.go
 
 type UserRepo interface {
 	InsertUser(entities.User) error
@@ -33,7 +29,7 @@ type CartRepo interface {
 	DeleteProductFromCart(int64, int)
 }
 
-type CombineRepos struct {
+type Repo struct {
 	UserRepo
 	OrderRepo
 	CartRepo

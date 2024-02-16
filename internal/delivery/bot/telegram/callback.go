@@ -310,11 +310,16 @@ func (tg TGBot) increaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 
 	currentProd.Amount++
 
-	tg.svc.NewCartProduct(userID, keys[idx], *currentProd)
+	err = tg.svc.NewCartProduct(userID, keys[idx], *currentProd)
+	if err != nil {
+		tg.logger.Error("increaseProductAmountHandler: new cart product failed", log2.Fields{
+			"error": err,
+		})
+	}
 
 	kb := cartKB(currentProd.Amount)
 
-	if err := tg.newEditMsgKeyboard(userID, kb); err != nil {
+	if err = tg.newEditMsgKeyboard(userID, kb); err != nil {
 		tg.logger.Error("increaseProductAmountHandler: new edit msg keyboard procedure failed", log2.Fields{
 			"error": err,
 		})

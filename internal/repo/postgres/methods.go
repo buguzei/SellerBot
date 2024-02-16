@@ -157,6 +157,16 @@ func (p Postgres) NewDoneOrder(orderID int64) error {
 
 		return err
 	}
+
+	defer func() {
+		err = tx.Rollback()
+		if err != nil {
+			p.logger.Error("NewDoneOrder: rollback error", log.Fields{
+				"error": err,
+			})
+		}
+	}()
+
 	// start transaction
 
 	var order entities.CurrentOrder

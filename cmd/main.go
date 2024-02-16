@@ -41,13 +41,13 @@ func main() {
 		}
 	}()
 
-	combine := repo.CombineRepos{
+	repos := repo.Repo{
 		UserRepo:  pg,
 		OrderRepo: pg,
 		CartRepo:  redis,
 	}
 
-	svc := service.NewService(combine)
+	svc := service.NewService(repos)
 
 	bot := telegram.NewTGBot(svc, cfg.Bot, logger)
 	bot.Run()
