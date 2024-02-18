@@ -85,6 +85,7 @@ func (tg TGBot) getProfileHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("getProfileHandler: getting user failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\nТелефон: %s", user.Name, user.Address, user.Phone)
@@ -95,6 +96,7 @@ func (tg TGBot) getProfileHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("getProfileHandler: new edit msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -119,11 +121,12 @@ func (tg TGBot) changeProfileHandler(callback *tgbotapi.CallbackQuery, data stri
 		sendText = newAddressText
 	}
 
-	err := tg.newEditMsgByDelete(userID, sendText, nil)
+	err := tg.newMsg(userID, sendText, nil)
 	if err != nil {
 		tg.logger.Error("changeProfileHandler: new edit msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -138,6 +141,7 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("startCartHandler: getting cart len failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if *cartLen == 0 {
@@ -150,6 +154,7 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("startCartHandler: getting cart failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	tg.cache[userID]["keys"] = make([]int, 0, len(cart))
@@ -168,6 +173,7 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("startCartHandler: getting cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if currentProd.Text != "" {
@@ -201,6 +207,7 @@ func (tg TGBot) startCartHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("startCartHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -220,6 +227,7 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("deleteProductFromCartHandler: getting cart len failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if *cartLen == 0 {
@@ -259,6 +267,7 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("deleteProductFromCartHandler: getting cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if currentProd.Text != "" {
@@ -292,6 +301,7 @@ func (tg TGBot) deleteProductFromCartHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("deleteProductFromCartHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -306,6 +316,7 @@ func (tg TGBot) increaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("increaseProductAmountHandler: getting cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	currentProd.Amount++
@@ -315,6 +326,7 @@ func (tg TGBot) increaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("increaseProductAmountHandler: new cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	kb := cartKB(currentProd.Amount)
@@ -323,6 +335,7 @@ func (tg TGBot) increaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("increaseProductAmountHandler: new edit msg keyboard procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -337,6 +350,7 @@ func (tg TGBot) decreaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("decreaseProductAmountHandler: getting cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if currentProd.Amount == 1 {
@@ -350,6 +364,7 @@ func (tg TGBot) decreaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("decreaseProductAmountHandler: new cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	kb := cartKB(currentProd.Amount)
@@ -358,6 +373,7 @@ func (tg TGBot) decreaseProductAmountHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("decreaseProductAmountHandler: new edit msg keyboard procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -372,6 +388,7 @@ func (tg TGBot) moveCartToRightHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("moveCartToRightHandler: getting cart len failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if *cartLen == 1 {
@@ -392,6 +409,7 @@ func (tg TGBot) moveCartToRightHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("moveCartToRightHandler: getting cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if currentProd.Text != "" {
@@ -425,6 +443,7 @@ func (tg TGBot) moveCartToRightHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("moveCartToRightHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -439,6 +458,7 @@ func (tg TGBot) moveCartToLeftHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("moveCartToLeftHandler: getting cart len failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if *cartLen == 1 {
@@ -459,6 +479,7 @@ func (tg TGBot) moveCartToLeftHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("moveCartToLeftHandler: getting cart product failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if currentProd.Text != "" {
@@ -492,6 +513,7 @@ func (tg TGBot) moveCartToLeftHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("moveCartToLeftHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -506,6 +528,7 @@ func (tg TGBot) backHomeHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("backHomeHandler: new edit msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -520,6 +543,7 @@ func (tg TGBot) startShoppingHandler(callback *tgbotapi.CallbackQuery, data stri
 		tg.logger.Error("startShoppingHandler: new edit msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -547,6 +571,7 @@ func (tg TGBot) productNameHandler(callback *tgbotapi.CallbackQuery, data string
 		tg.logger.Error("productNameHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -566,6 +591,7 @@ func (tg TGBot) productColorHandler(callback *tgbotapi.CallbackQuery, data strin
 		tg.logger.Error("productColorHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -586,6 +612,7 @@ func (tg TGBot) productSizeHandler(callback *tgbotapi.CallbackQuery, data string
 		tg.logger.Error("productSizeHandler: new edit photo msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }
 
@@ -598,6 +625,7 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("designOrderHandler: getting user failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	if user.Name == " " || user.Address == " " || user.Phone == " " {
@@ -611,6 +639,7 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("designOrderHandler: getting cart failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 
 	cartProducts := make([]entities.Product, 0, len(cart))
@@ -640,5 +669,6 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 		tg.logger.Error("designOrderHandler: new edit msg procedure failed", log2.Fields{
 			"error": err,
 		})
+		return
 	}
 }

@@ -1,5 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
+
 CREATE TABLE users (
     id bigint primary key not null,
     name text,
@@ -36,8 +37,8 @@ CREATE TABLE products (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE products;
-DROP TABLE done_orders;
-DROP TABLE current_orders;
-DROP TABLE users;
+-- DROP TABLE products;
+-- DROP TABLE done_orders;
+-- DROP TABLE current_orders;
+-- DROP TABLE users;
 -- +goose StatementEnd

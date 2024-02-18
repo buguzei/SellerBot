@@ -168,7 +168,7 @@ func (tg TGBot) addressLvlHandler(message *tgbotapi.Message) {
 		return
 	}
 
-	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\n ID: %s", user.Name, user.Address, user.Phone)
+	sendText := fmt.Sprintf("Ваш профиль.\n\nИмя: %s\nАдрес: %s\n Телефон: %s", user.Name, user.Address, user.Phone)
 	kb := profileKB()
 
 	err = tg.newMsg(userID, sendText, kb)

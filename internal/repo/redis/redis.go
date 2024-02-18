@@ -12,7 +12,7 @@ type Redis struct {
 
 func NewRedis(l log2.Logger) Redis {
 	options := &redis2.Options{
-		Addr:     "localhost:6379",
+		Addr:     "redis:6380",
 		Password: "",
 		DB:       0,
 	}

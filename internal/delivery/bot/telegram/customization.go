@@ -9,13 +9,13 @@ import (
 // here is text for bot's messages
 
 const (
-	startText           = "Привет! Это официальный бот бренда \"udobno\". Здесь ты можешь быстро и удобно заказать себе наши товары с нанесением и бесплатной доставкой по всей России 🤗"
+	startText           = "Привет! Это официальный бот бренда \"udobno\". Здесь ты можешь быстро и удобно заказать себе наши товары с вашим нанесением и бесплатной доставкой по всей России 🤗"
 	addingToCartText    = "Отлично! Вы успешно добавили ваш товар в корзину!"
-	customPrintText     = "Введите надпись или пришлите файл с изображением, которым хотите видеть у себя:"
-	emptyCartText       = "Ваша корзина пуста =)"
-	newNameText         = "Введите ваше новое имя"
-	newAddressText      = "Введите ваш новый адрес"
-	newPhoneText        = "Введите ваш новый номер телефона"
+	customPrintText     = "Введите надпись или пришлите изображение, которое хотите видеть у себя на изделии:"
+	emptyCartText       = "Ваша корзина пуста =("
+	newNameText         = "Введите имя:"
+	newAddressText      = "Введите адрес:"
+	newPhoneText        = "Введите номер телефона:"
 	createOrderText     = "Ваш заказ был успешно создан! В комментарии оплаты УКАЖИТЕ ВАШ НОМЕР ТЕЛЕФОНА, который указан у вас в профиле. Мы начнем делать ваш заказ сразу после того, как вы оплатите заказ на этот номер телефона: +7 925-321-16-99"
 	selectTypeText      = "Выберите, что вы хотите заказать"
 	selectSizeText      = "Выберите размер"
@@ -80,18 +80,19 @@ func newProdSizeKB(path string) *tgbotapi.InlineKeyboardMarkup {
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("XS", fmt.Sprintf("%s/XS", path)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("S", fmt.Sprintf("%s/S", path)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("M", fmt.Sprintf("%s/M", path)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("L", fmt.Sprintf("%s/L", path)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("XL", fmt.Sprintf("%s/XL", path)),
+			tgbotapi.NewInlineKeyboardButtonData("XXL", fmt.Sprintf("%s/XXL", path)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("3XL", fmt.Sprintf("%s/3XL", path)),
+			tgbotapi.NewInlineKeyboardButtonData("4XL", fmt.Sprintf("%s/4XL", path)),
 		),
 	)
 	return &kb

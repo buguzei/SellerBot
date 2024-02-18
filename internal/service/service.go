@@ -12,10 +12,10 @@ type Service struct {
 }
 
 // NewService is a constructor for Service
-func NewService(db repo.Repo) Service {
-	logger := log.NewLogrus("debug")
+func NewService(db repo.Repo, l log.Logger) Service {
+	l = l.Named("service")
 
-	return Service{db: db, logger: logger}
+	return Service{db: db, logger: l}
 }
 
 //user methods

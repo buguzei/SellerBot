@@ -2,19 +2,18 @@ package postgres
 
 import (
 	"bot/internal/config"
-	log2 "bot/internal/log"
+	"bot/internal/log"
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
-	"log"
 )
 
 type Postgres struct {
 	DB     *sql.DB
-	logger log2.Logger
+	logger log.Logger
 }
 
-func NewPostgres(cfg config.DBConf, l log2.Logger) Postgres {
+func NewPostgres(cfg config.DBConf, l log.Logger) Postgres {
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host,
 		cfg.Port,
@@ -22,17 +21,21 @@ func NewPostgres(cfg config.DBConf, l log2.Logger) Postgres {
 		cfg.Password,
 		cfg.DBName)
 
+	l = l.Named("postgres")
+
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+		l.Fatal("NewPostgres: error to open postgres", log.Fields{
+			"error": err,
+		})
 	}
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		l.Fatal("NewPostgres: error ping", log.Fields{
+			"error": err,
+		})
 	}
-
-	l = l.Named("postgres")
 
 	return Postgres{
 		DB:     db,
