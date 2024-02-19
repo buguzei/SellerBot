@@ -62,8 +62,11 @@ jobs:
             # Changing directory to app            
             cd app
             
-            # Stopping and deleting old container
-            docker kill $CONTAINER_NAME
+            # Stopping old container
+            docker stop $CONTAINER_NAME
+            
+            # Deleting old container
+            docker rm $CONTAINER_NAME
             
             # Deleting old image
             docker rmi $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME
