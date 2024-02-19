@@ -55,6 +55,6 @@ jobs:
         with:
           key: ${{ secrets.SSHKEY }}
           host: ${{ secrets.HOST }}
-          user: ${{ secrets.USER }}
+          username: ${{ secrets.USER }}
           port: ${{ secrets.PORT }}
           script: docker-compose up -d
