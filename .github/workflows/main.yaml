@@ -10,7 +10,6 @@ env:
   IMAGE_NAME: 'seller-bot'
   DOCKER_HUB_PASS: ${{ secrets.DOCKER_HUB_PASS }}
 
-
 jobs:
 
   test:
