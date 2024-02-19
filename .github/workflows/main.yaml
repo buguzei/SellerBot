@@ -40,7 +40,7 @@ jobs:
         run: docker login --username=$DOCKER_HUB_ID --password=$DOCKER_HUB_PASS
 
       - name: Build image
-        run: docker build -t $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME ../../.
+        run: docker build -t $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME .
 
       - name: Push image to Docker Hub
         run: docker push $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME
