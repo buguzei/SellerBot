@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Deploy new docker image to remote server
-        uses: appleboy/ssh-action@v0.1.3
+        uses: appleboy/ssh-action@v1.0.3
         with:
           key: ${{ secrets.SSHKEY }}
           host: ${{ secrets.HOST }}
