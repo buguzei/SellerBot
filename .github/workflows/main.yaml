@@ -48,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_and_push
 
+
     steps:
       - name: Deploy new docker image to remote server
         uses: appleboy/ssh-action@v1.0.3
