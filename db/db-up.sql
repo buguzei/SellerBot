@@ -1,6 +1,3 @@
--- +goose Up
--- +goose StatementBegin
-
 CREATE TABLE users (
     id bigint primary key not null,
     name text,
@@ -32,13 +29,3 @@ CREATE TABLE products (
     img   text,
     amount  int
 );
-
--- +goose StatementEnd
-
--- +goose Down
--- +goose StatementBegin
--- DROP TABLE products;
--- DROP TABLE done_orders;
--- DROP TABLE current_orders;
--- DROP TABLE users;
--- +goose StatementEnd

@@ -2,12 +2,10 @@ version: '3.8'
 
 services:
   seller-bot:
-    build: ./
-    command: ./bin/SellerBot
-    environment:
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_USER: buguzei
-      POSTGRES_DB: sellerbot
+    restart: always
+    image: buguzei/seller-bot:seller-bot
+    env_file:
+      - ./.env
     ports:
       - '8000:8000'
     depends_on:
@@ -15,10 +13,13 @@ services:
       - redis
   postgres:
     restart: always
-    build: ./db/
+    env_file:
+      - ./.env
+    image: buguzei/seller-bot:postgres
     ports:
       - '5436:5432'
   redis:
+    restart: always
     image: redis:latest
     command: --port 6380
     ports:

@@ -4,20 +4,57 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  DOCKER_HUB_ID: 'buguzei'
+  DOCKER_HUB_REPO: 'seller-bot'
+  IMAGE_NAME: 'seller-bot'
+  DOCKER_HUB_PASS: ${{ secrets.DOCKER_HUB_PASS }}
+
+
 jobs:
 
-  build:
+  test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout main
+        uses: actions/checkout@v3
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
 
-      - name: Build
-        run: go build -v ./...
-
       - name: Test
         run: go test -v ./...
+
+  build_and_push:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        run: docker login --username=$DOCKER_HUB_ID --password=$DOCKER_HUB_PASS
+
+      - name: Build image
+        run: docker build -t $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME ../../.
+
+      - name: Push image to Docker Hub
+        run: docker push $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push
+
+    steps:
+      - name: Deploy new docker image to remote server
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USER }}
+          key: ${{ secrets.SSHKEY }}
+          port: ${{ secrets.PORT }}
+          run: docker-compose up -d

@@ -2,6 +2,7 @@ package service
 
 import (
 	"bot/internal/entities"
+	"bot/internal/log"
 	"bot/internal/repo"
 	mockRepo "bot/internal/repo/mocks"
 	"errors"
@@ -33,7 +34,10 @@ func TestService_GetUser(t *testing.T) {
 		UserRepo: userRepo,
 	}
 
-	svc := NewService(repos)
+	l := log.NewLogrus("debug")
+	l.Named("service")
+
+	svc := NewService(repos, l)
 
 	got, err := svc.GetUser(expected.ID)
 
@@ -57,7 +61,10 @@ func TestService_GetUserError(t *testing.T) {
 		UserRepo: userRepo,
 	}
 
-	svc := NewService(repos)
+	l := log.NewLogrus("debug")
+	l.Named("service")
+
+	svc := NewService(repos, l)
 
 	got, err := svc.GetUser(userID)
 
@@ -123,7 +130,10 @@ func TestService_GetAllCurrentOrders(t *testing.T) {
 
 	repos := repo.Repo{OrderRepo: orderRepo}
 
-	svc := NewService(repos)
+	l := log.NewLogrus("debug")
+	l.Named("service")
+
+	svc := NewService(repos, l)
 
 	got, err := svc.GetAllCurrentOrders()
 
@@ -143,7 +153,10 @@ func TestService_GetAllCurrentOrdersError(t *testing.T) {
 
 	repos := repo.Repo{OrderRepo: orderRepo}
 
-	svc := NewService(repos)
+	l := log.NewLogrus("debug")
+	l.Named("service")
+
+	svc := NewService(repos, l)
 
 	got, err := svc.GetAllCurrentOrders()
 
@@ -175,7 +188,10 @@ func TestService_GetCartProduct(t *testing.T) {
 
 	repos := repo.Repo{CartRepo: cartRepo}
 
-	svc := NewService(repos)
+	l := log.NewLogrus("debug")
+	l.Named("service")
+
+	svc := NewService(repos, l)
 
 	got, err := svc.GetCartProduct(userID, idx)
 
@@ -197,7 +213,10 @@ func TestService_GetCartProductError(t *testing.T) {
 
 	repos := repo.Repo{CartRepo: cartRepo}
 
-	svc := NewService(repos)
+	l := log.NewLogrus("debug")
+	l.Named("service")
+
+	svc := NewService(repos, l)
 
 	got, err := svc.GetCartProduct(userID, idx)
 

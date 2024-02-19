@@ -14,12 +14,16 @@ type Postgres struct {
 }
 
 func NewPostgres(cfg config.DBConf, l log.Logger) Postgres {
+	fmt.Println(cfg.Port)
+
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host,
 		cfg.Port,
 		cfg.User,
 		cfg.Password,
 		cfg.DBName)
+
+	connStr = "host=postgres port=5432 user=buguzei password=123456 dbname=sellerbot sslmode=disable"
 
 	l = l.Named("postgres")
 
