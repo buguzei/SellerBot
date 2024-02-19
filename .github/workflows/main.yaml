@@ -52,7 +52,7 @@ jobs:
       - name: Deploy new docker image to remote server
         uses: appleboy/ssh-action@v0.1.3
         with:
-          password: ${{ secrets.SERVER_PASS }}
+          key: ${{ secrets.SSHKEY }}
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
           port: ${{ secrets.PORT }}
