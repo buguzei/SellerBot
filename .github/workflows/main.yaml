@@ -63,6 +63,9 @@ jobs:
             # Changing directory to app            
             cd app
             
+            # Login to Docker Hub
+            docker login --username=$DOCKER_HUB_ID --password=$DOCKER_HUB_PASS
+            
             docker-compose pull
             
             # Pulling new image and then starting app in background
