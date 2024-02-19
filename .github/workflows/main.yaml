@@ -63,11 +63,7 @@ jobs:
             # Changing directory to app            
             cd app
             
-            # Stopping and deleting old container
-            docker kill $CONTAINER_NAME
-            
-            # Deleting old image
-            docker rmi $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME
+            docker-compose pull
             
             # Pulling new image and then starting app in background
             docker-compose up -d
