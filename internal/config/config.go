@@ -48,7 +48,7 @@ func InitConfig() (*Config, error) {
 }
 
 func getEnv(envKey string) (string, error) {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load("../../.env")
 	if err != nil {
 		log.Printf("err loading: %v\n", err)
 	}
