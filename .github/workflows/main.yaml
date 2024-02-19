@@ -52,8 +52,8 @@ jobs:
       - name: Deploy new docker image to remote server
         uses: appleboy/ssh-action@v0.1.3
         with:
+          password: ${{ secrets.SERVER_PASS }}
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
-          key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           run: docker-compose up -d
