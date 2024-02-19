@@ -57,4 +57,4 @@ jobs:
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
           port: ${{ secrets.PORT }}
-          run: docker-compose up -d
+          script: docker-compose up -d
