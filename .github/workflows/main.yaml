@@ -58,12 +58,13 @@ jobs:
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
+          envs: DOCKER_HUB_PASS, CONTAINER_NAME, IMAGE_NAME, DOCKER_HUB_ID, DOCKER_HUB_REPO
           script: |
             # Changing directory to app            
             cd app
             
             # Stopping and deleting old container
-            docker kill $(echo $CONTAINER_NAME)
+            docker kill $CONTAINER_NAME
             
             # Deleting old image
             docker rmi $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME
