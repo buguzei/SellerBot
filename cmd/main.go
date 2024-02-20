@@ -16,7 +16,7 @@ func main() {
 
 	cfg, err := config.InitConfig()
 	if err != nil {
-		logger.Fatal("Initialization of config failed", log.Fields{
+		logger.Error("Initialization of config failed", log.Fields{
 			"error": err,
 		})
 	}
