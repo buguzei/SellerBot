@@ -134,13 +134,9 @@ func backToStartKB() *tgbotapi.InlineKeyboardMarkup {
 func profileKB() *tgbotapi.InlineKeyboardMarkup {
 	kb := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить имя", "profile/name"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить адрес", "profile/address"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить телефон", "profile/phone"),
+			tgbotapi.NewInlineKeyboardButtonData("Имя", "profile/name"),
+			tgbotapi.NewInlineKeyboardButtonData("Адрес", "profile/address"),
+			tgbotapi.NewInlineKeyboardButtonData("Телефон", "profile/phone"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Корзина 🛍", "cart"),
