@@ -42,6 +42,8 @@ jobs:
       - name: Build image
         run: docker build -t $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME .
 
+      - name: reading env file
+
       - name: Push image to Docker Hub
         run: docker push $DOCKER_HUB_ID/$DOCKER_HUB_REPO:$IMAGE_NAME
 

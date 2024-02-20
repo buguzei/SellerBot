@@ -6,6 +6,8 @@ services:
     image: buguzei/seller-bot:seller-bot
     env_file:
       - ./.env
+    volumes:
+      - ./config/:/root/config/
     ports:
       - '8000:8000'
     depends_on:
