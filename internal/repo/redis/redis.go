@@ -10,6 +10,7 @@ type Redis struct {
 	logger log2.Logger
 }
 
+// NewRedis is a constructor for Redis
 func NewRedis(l log2.Logger) Redis {
 	options := &redis2.Options{
 		Addr:     "redis:6380",

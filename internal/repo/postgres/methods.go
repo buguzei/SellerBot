@@ -3,6 +3,7 @@ package postgres
 import (
 	"bot/internal/entities"
 	"bot/internal/log"
+	"database/sql"
 	"time"
 )
 
@@ -22,12 +23,19 @@ func (p Postgres) InsertUser(user entities.User) error {
 	return nil
 }
 
+type result struct {
+	name    sql.NullString
+	phone   sql.NullString
+	address sql.NullString
+}
+
 func (p Postgres) GetUser(userID int64) (*entities.User, error) {
 	var user entities.User
+	var res result
 
 	row := p.DB.QueryRow("SELECT * FROM users WHERE id=($1)", userID)
 
-	err := row.Scan(&user.ID, &user.Name, &user.Phone, &user.Address)
+	err := row.Scan(&user.ID, &res.name, &res.phone, &res.address)
 	if err != nil {
 		p.logger.Error("GetUser: scan error", log.Fields{
 			"error": err,
@@ -35,6 +43,10 @@ func (p Postgres) GetUser(userID int64) (*entities.User, error) {
 
 		return nil, err
 	}
+
+	user.Name = res.name.String
+	user.Phone = res.name.String
+	user.Address = res.address.String
 
 	return &user, nil
 }

@@ -6,6 +6,12 @@ import (
 
 //go:generate mockgen -source=./repo.go -destination=./mocks/repository-mock.go
 
+type Repo struct {
+	UserRepo
+	OrderRepo
+	CartRepo
+}
+
 type UserRepo interface {
 	InsertUser(entities.User) error
 	GetUser(int64) (*entities.User, error)
@@ -27,10 +33,4 @@ type CartRepo interface {
 	GetCart(int64) (map[int]entities.Product, error)
 	ClearCart(int64)
 	DeleteProductFromCart(int64, int)
-}
-
-type Repo struct {
-	UserRepo
-	OrderRepo
-	CartRepo
 }

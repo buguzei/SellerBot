@@ -628,7 +628,7 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 		return
 	}
 
-	if user.Name == " " || user.Address == " " || user.Phone == " " {
+	if user.Name == "" || user.Address == "" || user.Phone == "" {
 		tg.getProfileHandler(callback)
 		return
 	}
@@ -667,6 +667,14 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 	err = tg.newEditMsgByDelete(userID, sendText, kb)
 	if err != nil {
 		tg.logger.Error("designOrderHandler: new edit msg procedure failed", log2.Fields{
+			"error": err,
+		})
+		return
+	}
+
+	for _, admin := range tg.conf.Admins {
+		err = tg.newMsg(admin, "Поступил новый заказ!", nil)
+		tg.logger.Error("designOrderHandler: new msg procedure failed", log2.Fields{
 			"error": err,
 		})
 		return

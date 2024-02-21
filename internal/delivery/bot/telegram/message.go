@@ -240,7 +240,7 @@ func (tg TGBot) currentCommandHandler(message *tgbotapi.Message) {
 			)
 		}
 
-		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\nДата заказа: %s%v\n\n/done_%d", user.Name, user.Address, fmt.Sprintf("%d.%d.%d", order.Start.Day(), order.Start.Month(), order.Start.Year()), productText, order.ID)
+		sendText := fmt.Sprintf("Имя: %s\nАдрес: %s\nТелефон: %s\nДата заказа: %s%v\n\n/done_%d", user.Name, user.Address, user.Phone, fmt.Sprintf("%d.%d.%d", order.Start.Day(), order.Start.Month(), order.Start.Year()), productText, order.ID)
 
 		err = tg.newMsg(userID, sendText, nil)
 		if err != nil {
@@ -370,7 +370,7 @@ func (tg TGBot) printLvlHandler(update tgbotapi.Update) {
 		return
 	}
 
-	err = tg.newMsg(userID, addingToCartText, backToStartKB())
+	err = tg.newMsg(userID, addingToCartText, backAndStartKB())
 	if err != nil {
 		tg.logger.Error("printLvlHandler: new msg procedure failed", log2.Fields{
 			"error": err,

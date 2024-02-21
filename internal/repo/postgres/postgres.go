@@ -13,6 +13,7 @@ type Postgres struct {
 	logger log.Logger
 }
 
+// NewPostgres is a constructor for Postgres
 func NewPostgres(cfg config.DBConf, l log.Logger) Postgres {
 	fmt.Println(cfg.Port)
 

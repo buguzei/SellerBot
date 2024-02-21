@@ -26,6 +26,8 @@ CREATE TABLE products (
     size  text,
     color text,
     text  text,
-    img   text,
+    text_color text,
+    img text,
+    print_place text,
     amount  int
 );

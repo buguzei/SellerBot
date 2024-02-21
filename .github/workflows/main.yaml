@@ -66,7 +66,8 @@ jobs:
             # Login to Docker Hub
             docker login --username=$DOCKER_HUB_ID --password=$DOCKER_HUB_PASS
             
+            # Pulling new image
             docker-compose pull
             
-            # Pulling new image and then starting app in background
+            # Starting app in background
             docker-compose up -d
