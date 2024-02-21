@@ -45,7 +45,7 @@ func (p Postgres) GetUser(userID int64) (*entities.User, error) {
 	}
 
 	user.Name = res.name.String
-	user.Phone = res.name.String
+	user.Phone = res.phone.String
 	user.Address = res.address.String
 
 	return &user, nil
