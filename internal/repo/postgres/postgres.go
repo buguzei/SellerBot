@@ -22,6 +22,8 @@ func NewPostgres(cfg config.DBConf, l log.Logger) Postgres {
 		cfg.Password,
 		cfg.DBName)
 
+	fmt.Println(connStr)
+
 	l = l.Named("postgres")
 
 	db, err := sql.Open("postgres", connStr)

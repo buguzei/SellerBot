@@ -1,5 +1,6 @@
 package log
 
+// Fields is an additional info for logs
 type Fields map[string]interface{}
 
 type Logger interface {

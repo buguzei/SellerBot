@@ -3,7 +3,7 @@ version: '3.8'
 services:
   seller-bot:
     restart: always
-    image: buguzei/seller-bot:seller-bot
+    build: ./
     env_file:
       - ./.env
     volumes:
@@ -17,7 +17,7 @@ services:
     restart: always
     env_file:
       - ./.env
-    image: buguzei/seller-bot:postgres
+    image: postgres:latest
     ports:
       - '5436:5432'
   redis:
