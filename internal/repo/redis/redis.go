@@ -1,7 +1,9 @@
 package redis
 
 import (
+	"bot/internal/config"
 	log2 "bot/internal/log"
+	"fmt"
 	redis2 "github.com/redis/go-redis/v9"
 )
 
@@ -11,9 +13,9 @@ type Redis struct {
 }
 
 // NewRedis is a constructor for Redis
-func NewRedis(l log2.Logger) Redis {
+func NewRedis(cfg config.RedisConf, l log2.Logger) Redis {
 	options := &redis2.Options{
-		Addr:     "redis:6380",
+		Addr:     fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
 		Password: "",
 		DB:       0,
 	}

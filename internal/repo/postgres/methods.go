@@ -46,14 +46,20 @@ func (p Postgres) GetUser(userID int64) (*entities.User, error) {
 
 	if !res.name.Valid {
 		user.Name = ""
+	} else {
+		user.Name = res.name.String
 	}
 
 	if !res.phone.Valid {
 		user.Phone = ""
+	} else {
+		user.Phone = res.phone.String
 	}
 
 	if !res.address.Valid {
 		user.Address = ""
+	} else {
+		user.Address = res.address.String
 	}
 
 	return &user, nil

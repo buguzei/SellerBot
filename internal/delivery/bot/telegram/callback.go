@@ -628,9 +628,6 @@ func (tg TGBot) designOrderHandler(callback *tgbotapi.CallbackQuery) {
 		return
 	}
 
-	fmt.Println(user)
-	fmt.Println("here")
-
 	if user.Name == "" || user.Address == "" || user.Phone == "" {
 		tg.getProfileHandler(callback)
 		return

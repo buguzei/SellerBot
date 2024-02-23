@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	Bot BotConf `yaml:"bot"`
-	DB  DBConf  `yaml:"db-conn"`
+	Bot   BotConf   `yaml:"bot"`
+	DB    DBConf    `yaml:"db-conn"`
+	Redis RedisConf `yaml:"redis-conn"`
 }
 
 type BotConf struct {
@@ -24,6 +25,11 @@ type DBConf struct {
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
 	DBName   string `yaml:"db-name"`
+}
+
+type RedisConf struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
 func InitConfig() (*Config, error) {
